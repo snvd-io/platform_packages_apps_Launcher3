@@ -59,8 +59,10 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.SHOW_WORK_APPS" />
-                <category android:name="android.intent.category.HOME" />
-                <category android:name="android.intent.category.DEFAULT" />
+<!--                Commented out by request of Brennan - John-->
+
+<!--                <category android:name="android.intent.category.HOME" />-->
+<!--                <category android:name="android.intent.category.DEFAULT" />-->
                 <category android:name="android.intent.category.MONKEY"/>
                 <category android:name="android.intent.category.LAUNCHER_APP" />
             </intent-filter>

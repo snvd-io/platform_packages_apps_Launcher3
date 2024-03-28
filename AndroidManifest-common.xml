@@ -175,8 +175,9 @@
             android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.SECONDARY_HOME" />
-                <category android:name="android.intent.category.DEFAULT" />
+<!--                Commented out per Brennan -John-->
+<!--                <category android:name="android.intent.category.SECONDARY_HOME" />-->
+<!--                <category android:name="android.intent.category.DEFAULT" />-->
             </intent-filter>
         </activity>
 
