@@ -70,6 +70,8 @@ import com.android.launcher3.util.MultiPropertyFactory;
 import com.android.launcher3.util.MultiTranslateDelegate;
 import com.android.launcher3.util.MultiValueAlpha;
 import com.android.launcher3.views.IconButtonView;
+import com.android.quickstep.util.GroupTask;
+import com.android.systemui.shared.recents.model.Task;
 
 import java.io.PrintWriter;
 import java.util.Set;
@@ -519,21 +521,31 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         for (View iconView : getIconViews()) {
             if (iconView instanceof BubbleTextView btv) {
                 btv.updateRunningState(
-                        getRunningAppState(btv.getTargetPackageName(), runningPackages,
-                                minimizedPackages));
+                        getRunningAppState(btv, runningPackages, minimizedPackages));
             }
         }
     }
 
     private BubbleTextView.RunningAppState getRunningAppState(
-            String packageName,
+            BubbleTextView btv,
             Set<String> runningPackages,
             Set<String> minimizedPackages) {
-        if (minimizedPackages.contains(packageName)) {
-            return BubbleTextView.RunningAppState.MINIMIZED;
+        Object tag = btv.getTag();
+        if (tag instanceof ItemInfo itemInfo) {
+            if (minimizedPackages.contains(itemInfo.getTargetPackage())) {
+                return BubbleTextView.RunningAppState.MINIMIZED;
+            }
+            if (runningPackages.contains(itemInfo.getTargetPackage())) {
+                return BubbleTextView.RunningAppState.RUNNING;
+            }
         }
-        if (runningPackages.contains(packageName)) {
-            return BubbleTextView.RunningAppState.RUNNING;
+        if (tag instanceof GroupTask groupTask && !groupTask.hasMultipleTasks()) {
+            if (minimizedPackages.contains(groupTask.task1.key.getPackageName())) {
+                return BubbleTextView.RunningAppState.MINIMIZED;
+            }
+            if (runningPackages.contains(groupTask.task1.key.getPackageName())) {
+                return BubbleTextView.RunningAppState.RUNNING;
+            }
         }
         return BubbleTextView.RunningAppState.NOT_RUNNING;
     }
@@ -873,6 +885,22 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         mModelCallbacks.commitRunningAppsToUI();
     }
 
+    /**
+     * To be called when the given Task is updated, so that we can tell TaskbarView to also update.
+     * @param task The Task whose e.g. icon changed.
+     */
+    public void onTaskUpdated(Task task) {
+        // Find the icon view(s) that changed.
+        for (View view : mTaskbarView.getIconViews()) {
+            if (view instanceof BubbleTextView btv
+                    && view.getTag() instanceof GroupTask groupTask) {
+                if (groupTask.containsTask(task.key.id)) {
+                    mTaskbarView.applyGroupTaskToBubbleTextView(btv, groupTask);
+                }
+            }
+        }
+    }
+
     @Override
     public void dumpLogs(String prefix, PrintWriter pw) {
         pw.println(prefix + "TaskbarViewController:");
@@ -892,5 +920,4 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
 
         mModelCallbacks.dumpLogs(prefix + "\t", pw);
     }
-
 }

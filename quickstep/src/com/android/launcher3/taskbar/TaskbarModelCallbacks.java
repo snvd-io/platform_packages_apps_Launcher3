@@ -33,6 +33,7 @@ import com.android.launcher3.util.ItemInfoMatcher;
 import com.android.launcher3.util.LauncherBindableItemsContainer;
 import com.android.launcher3.util.PackageUserKey;
 import com.android.launcher3.util.Preconditions;
+import com.android.quickstep.util.GroupTask;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -130,7 +131,7 @@ public class TaskbarModelCallbacks implements
         final int itemCount = mContainer.getChildCount();
         for (int itemIdx = 0; itemIdx < itemCount; itemIdx++) {
             View item = mContainer.getChildAt(itemIdx);
-            if (op.evaluate((ItemInfo) item.getTag(), item)) {
+            if (item.getTag() instanceof ItemInfo itemInfo && op.evaluate(itemInfo, item)) {
                 return;
             }
         }
@@ -201,18 +202,20 @@ public class TaskbarModelCallbacks implements
         if (mDeferUpdatesForSUW) {
             ItemInfo[] finalHotseatItemInfos = hotseatItemInfos;
             mDeferredUpdates = () ->
-                    commitHotseatItemUpdates(finalHotseatItemInfos, runningPackages,
+                    commitHotseatItemUpdates(finalHotseatItemInfos,
+                            recentAppsController.getShownTasks(), runningPackages,
                             minimizedPackages);
         } else {
-            commitHotseatItemUpdates(hotseatItemInfos, runningPackages, minimizedPackages);
+            commitHotseatItemUpdates(hotseatItemInfos,
+                    recentAppsController.getShownTasks(), runningPackages, minimizedPackages);
         }
     }
 
-    private void commitHotseatItemUpdates(ItemInfo[] hotseatItemInfos, Set<String> runningPackages,
-            Set<String> minimizedPackages) {
-        mContainer.updateHotseatItems(hotseatItemInfos);
-        mControllers.taskbarViewController.updateIconViewsRunningStates(runningPackages,
-                minimizedPackages);
+    private void commitHotseatItemUpdates(ItemInfo[] hotseatItemInfos, List<GroupTask> recentTasks,
+            Set<String> runningPackages, Set<String> minimizedPackages) {
+        mContainer.updateHotseatItems(hotseatItemInfos, recentTasks);
+        mControllers.taskbarViewController.updateIconViewsRunningStates(
+                runningPackages, minimizedPackages);
     }
 
     /**
