@@ -26,6 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.AbstractFloatingView;
+import com.android.launcher3.BaseActivity;
 import com.android.launcher3.Flags;
 import com.android.launcher3.R;
 import com.android.launcher3.SecondaryDropTarget;
@@ -239,7 +240,7 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
         protected abstract Intent getIntent(String targetPkg);
     }
 
-    public static final Factory<BaseDraggingActivity> STORAGE_SCOPES = StorageScopes::maybeGet;
+    public static final Factory<BaseActivity> STORAGE_SCOPES = StorageScopes::maybeGet;
 
     public static class StorageScopes<T extends Context & ActivityContext> extends ScopesShortcut<T> {
 
