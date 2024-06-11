@@ -264,7 +264,7 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
         }
     }
 
-    public static final Factory<BaseDraggingActivity> CONTACT_SCOPES = ContactScopes::maybeGet;
+    public static final Factory<BaseActivity> CONTACT_SCOPES = ContactScopes::maybeGet;
 
     public static class ContactScopes<T extends Context & ActivityContext> extends ScopesShortcut<T> {
 
