@@ -156,9 +156,16 @@ class TaskbarRecentAppsController(
         }
         val tasks = desktopTask?.tasks ?: emptyList()
         // Kind of hacky, we wrap each single task in the Desktop as a GroupTask.
-        val desktopTaskAsList = tasks.map { GroupTask(it) }
+        var desktopTaskAsList = tasks.map { GroupTask(it) }
         // TODO(b/315344726 Multi-instance support): dedupe Tasks of the same package too.
-        return dedupeHotseatTasks(desktopTaskAsList, shownHotseatItems)
+        desktopTaskAsList = dedupeHotseatTasks(desktopTaskAsList, shownHotseatItems)
+        val desktopPackages = desktopTaskAsList.map { it.packageNames }
+        // Remove any missing Tasks.
+        val newShownTasks = shownTasks.filter { it.packageNames in desktopPackages }.toMutableList()
+        val newShownPackages = newShownTasks.map { it.packageNames }
+        // Add any new Tasks, maintaining the order from previous shownTasks.
+        newShownTasks.addAll(desktopTaskAsList.filter { it.packageNames !in newShownPackages })
+        return newShownTasks.toList()
     }
 
     private fun computeShownRecentTasks(): List<GroupTask> {

@@ -230,6 +230,78 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         assertThat(recentAppsController.minimizedAppPackages).isEmpty()
     }
 
+    @Test
+    fun onRecentTasksChanged_inDesktopMode_shownTasks_maintainsOrder() {
+        setInDesktopMode(true)
+        val originalOrder = listOf(RUNNING_APP_PACKAGE_1, RUNNING_APP_PACKAGE_2)
+        prepareHotseatAndRunningAndRecentApps(
+            hotseatPackages = emptyList(),
+            runningTaskPackages = originalOrder,
+            recentTaskPackages = emptyList()
+        )
+        prepareHotseatAndRunningAndRecentApps(
+            hotseatPackages = emptyList(),
+            runningTaskPackages = listOf(RUNNING_APP_PACKAGE_2, RUNNING_APP_PACKAGE_1),
+            recentTaskPackages = emptyList()
+        )
+        val shownPackages = recentAppsController.shownTasks.flatMap { it.packageNames }
+        assertThat(shownPackages).isEqualTo(originalOrder)
+    }
+
+    @Test
+    fun onRecentTasksChanged_inDesktopMode_addTask_shownTasks_maintainsOrder() {
+        setInDesktopMode(true)
+        prepareHotseatAndRunningAndRecentApps(
+            hotseatPackages = emptyList(),
+            runningTaskPackages = listOf(RUNNING_APP_PACKAGE_1, RUNNING_APP_PACKAGE_2),
+            recentTaskPackages = emptyList()
+        )
+        prepareHotseatAndRunningAndRecentApps(
+            hotseatPackages = emptyList(),
+            runningTaskPackages =
+                listOf(RUNNING_APP_PACKAGE_2, RUNNING_APP_PACKAGE_1, RUNNING_APP_PACKAGE_3),
+            recentTaskPackages = emptyList()
+        )
+        val shownPackages = recentAppsController.shownTasks.flatMap { it.packageNames }
+        val expectedOrder =
+            listOf(RUNNING_APP_PACKAGE_1, RUNNING_APP_PACKAGE_2, RUNNING_APP_PACKAGE_3)
+        assertThat(shownPackages).isEqualTo(expectedOrder)
+    }
+
+    @Test
+    fun onRecentTasksChanged_inDesktopMode_removeTask_shownTasks_maintainsOrder() {
+        setInDesktopMode(true)
+        prepareHotseatAndRunningAndRecentApps(
+            hotseatPackages = emptyList(),
+            runningTaskPackages =
+                listOf(RUNNING_APP_PACKAGE_1, RUNNING_APP_PACKAGE_2, RUNNING_APP_PACKAGE_3),
+            recentTaskPackages = emptyList()
+        )
+        prepareHotseatAndRunningAndRecentApps(
+            hotseatPackages = emptyList(),
+            runningTaskPackages = listOf(RUNNING_APP_PACKAGE_2, RUNNING_APP_PACKAGE_1),
+            recentTaskPackages = emptyList()
+        )
+        val shownPackages = recentAppsController.shownTasks.flatMap { it.packageNames }
+        assertThat(shownPackages).isEqualTo(listOf(RUNNING_APP_PACKAGE_1, RUNNING_APP_PACKAGE_2))
+    }
+
+    @Test
+    fun onRecentTasksChanged_enterDesktopMode_shownTasks_onlyIncludesRunningTasks() {
+        setInDesktopMode(false)
+        val runningTaskPackages = listOf(RUNNING_APP_PACKAGE_1, RUNNING_APP_PACKAGE_2)
+        val recentTaskPackages = listOf(RECENT_PACKAGE_1, RECENT_PACKAGE_2)
+        prepareHotseatAndRunningAndRecentApps(
+            hotseatPackages = emptyList(),
+            runningTaskPackages = runningTaskPackages,
+            recentTaskPackages = recentTaskPackages
+        )
+        setInDesktopMode(true)
+        recentTasksChangedListener.onRecentTasksChanged()
+        val shownPackages = recentAppsController.shownTasks.flatMap { it.packageNames }
+        assertThat(shownPackages).containsExactlyElementsIn(runningTaskPackages)
+    }
+
     private fun prepareHotseatAndRunningAndRecentApps(
         hotseatPackages: List<String>,
         runningTaskPackages: List<String>,
