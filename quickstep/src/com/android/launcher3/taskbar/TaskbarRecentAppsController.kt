@@ -16,15 +16,19 @@
 package com.android.launcher3.taskbar
 
 import androidx.annotation.VisibleForTesting
+import com.android.launcher3.Flags.enableRecentsInTaskbar
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.taskbar.TaskbarControllers.LoggableTaskbarController
+import com.android.launcher3.util.CancellableTask
 import com.android.quickstep.RecentsModel
 import com.android.quickstep.util.DesktopTask
 import com.android.quickstep.util.GroupTask
+import com.android.systemui.shared.recents.model.Task
 import com.android.window.flags.Flags.enableDesktopWindowingMode
 import com.android.window.flags.Flags.enableDesktopWindowingTaskbarRunningApps
 import java.io.PrintWriter
+import java.util.function.Consumer
 
 /**
  * Provides recent apps functionality, when the Taskbar Recent Apps section is enabled. Behavior:
@@ -46,13 +50,19 @@ class TaskbarRecentAppsController(
             field = isEnabledFromTest
         }
 
+    // TODO(b/343532825): Add a setting to disable Recents even when the flag is on.
+    var canShowRecentApps = enableRecentsInTaskbar()
+        @VisibleForTesting
+        set(isEnabledFromTest) {
+            field = isEnabledFromTest
+        }
+
     // Initialized in init.
     private lateinit var controllers: TaskbarControllers
 
     private var shownHotseatItems: List<ItemInfo> = emptyList()
     private var allRecentTasks: List<GroupTask> = emptyList()
     private var desktopTask: DesktopTask? = null
-    // TODO(next CL): actually read and show these
     var shownTasks: List<GroupTask> = emptyList()
         private set
 
@@ -93,6 +103,8 @@ class TaskbarRecentAppsController(
     private val recentTasksChangedListener =
         RecentsModel.RecentTasksChangedListener { reloadRecentTasksIfNeeded() }
 
+    private val iconLoadRequests: MutableSet<CancellableTask<*>> = HashSet()
+
     // TODO(b/343291428): add TaskVisualsChangListener as well (for calendar/clock?)
 
     // Used to keep track of the last requested task list ID, so that we do not request to load the
@@ -107,12 +119,15 @@ class TaskbarRecentAppsController(
 
     fun onDestroy() {
         recentsModel.unregisterRecentTasksChangedListener()
+        iconLoadRequests.forEach { it.cancel() }
+        iconLoadRequests.clear()
     }
 
     /** Called to update hotseatItems, in order to de-dupe them from Recent/Running tasks later. */
     fun updateHotseatItemInfos(hotseatItems: Array<ItemInfo?>): Array<ItemInfo?> {
         // Ignore predicted apps - we show running or recent apps instead.
-        val removePredictions = isInDesktopMode && canShowRunningApps
+        val removePredictions =
+            (isInDesktopMode && canShowRunningApps) || (!isInDesktopMode && canShowRecentApps)
         if (!removePredictions) {
             shownHotseatItems = hotseatItems.filterNotNull()
             onRecentsOrHotseatChanged()
@@ -148,6 +163,17 @@ class TaskbarRecentAppsController(
             } else {
                 computeShownRecentTasks()
             }
+
+        for (groupTask in shownTasks) {
+            for (task in groupTask.tasks) {
+                val callback =
+                    Consumer<Task> { controllers.taskbarViewController.onTaskUpdated(it) }
+                val cancellableTask = recentsModel.iconCache.updateIconInBackground(task, callback)
+                if (cancellableTask != null) {
+                    iconLoadRequests.add(cancellableTask)
+                }
+            }
+        }
     }
 
     private fun computeShownRunningTasks(): List<GroupTask> {
@@ -169,8 +195,18 @@ class TaskbarRecentAppsController(
     }
 
     private fun computeShownRecentTasks(): List<GroupTask> {
-        // TODO(next CL): implement Recents section
-        return emptyList()
+        if (!canShowRecentApps || allRecentTasks.isEmpty()) {
+            return emptyList()
+        }
+        // Remove the current task.
+        val allRecentTasks = allRecentTasks.subList(0, allRecentTasks.size - 1)
+        // TODO(b/315344726 Multi-instance support): dedupe Tasks of the same package too
+        var shownTasks = dedupeHotseatTasks(allRecentTasks, shownHotseatItems)
+        if (shownTasks.size > MAX_RECENT_TASKS) {
+            // Remove any tasks older than MAX_RECENT_TASKS.
+            shownTasks = shownTasks.subList(shownTasks.size - MAX_RECENT_TASKS, shownTasks.size)
+        }
+        return shownTasks
     }
 
     private fun dedupeHotseatTasks(
@@ -187,6 +223,7 @@ class TaskbarRecentAppsController(
     override fun dumpLogs(prefix: String, pw: PrintWriter) {
         pw.println("$prefix TaskbarRecentAppsController:")
         pw.println("$prefix\tcanShowRunningApps=$canShowRunningApps")
+        pw.println("$prefix\tcanShowRecentApps=$canShowRecentApps")
         pw.println("$prefix\tshownHotseatItems=${shownHotseatItems.map{item->item.targetPackage}}")
         pw.println("$prefix\tallRecentTasks=${allRecentTasks.map { it.packageNames }}")
         pw.println("$prefix\tdesktopTask=${desktopTask?.packageNames}")
@@ -197,4 +234,8 @@ class TaskbarRecentAppsController(
 
     private val GroupTask.packageNames: List<String>
         get() = tasks.map { task -> task.key.packageName }
+
+    private companion object {
+        const val MAX_RECENT_TASKS = 2
+    }
 }
