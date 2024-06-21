@@ -224,7 +224,6 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         }
         LauncherAppState.getInstance(mActivity).getModel().removeCallbacks(mModelCallbacks);
         mActivity.removeOnDeviceProfileChangeListener(mDeviceProfileChangeListener);
-        mModelCallbacks.unregisterListeners();
     }
 
     public boolean areIconsVisible() {
@@ -869,6 +868,11 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         return mTaskbarView.isEventOverAnyItem(ev);
     }
 
+    /** Called when there's a change in running apps to update the UI. */
+    public void commitRunningAppsToUI() {
+        mModelCallbacks.commitRunningAppsToUI();
+    }
+
     @Override
     public void dumpLogs(String prefix, PrintWriter pw) {
         pw.println(prefix + "TaskbarViewController:");
@@ -887,16 +891,6 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
                 "ALPHA_INDEX_SMALL_SCREEN");
 
         mModelCallbacks.dumpLogs(prefix + "\t", pw);
-    }
-
-    /** Called when there's a change in running apps to update the UI. */
-    public void commitRunningAppsToUI() {
-        mModelCallbacks.commitRunningAppsToUI();
-    }
-
-    /** Call TaskbarModelCallbacks to update running apps. */
-    public void updateRunningApps() {
-        mModelCallbacks.updateRunningApps();
     }
 
 }
