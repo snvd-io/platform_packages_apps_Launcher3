@@ -33,10 +33,8 @@ import com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_TOP_O
 import com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_UNDEFINED
 import com.android.quickstep.TaskOverlayFactory
 import com.android.quickstep.util.RecentsOrientedState
-import com.android.quickstep.util.SplitScreenUtils.Companion.convertLauncherSplitBoundsToShell
 import com.android.quickstep.util.SplitSelectStateController
 import com.android.systemui.shared.recents.model.Task
-import com.android.systemui.shared.recents.utilities.PreviewPositionHelper
 import com.android.systemui.shared.system.InteractionJankMonitorWrapper
 import com.android.wm.shell.common.split.SplitScreenConstants.PersistentSnapPosition
 
@@ -147,23 +145,7 @@ class GroupedTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
             )
         taskContainers.forEach { it.bind() }
 
-        this.splitBoundsConfig =
-            splitBoundsConfig?.also {
-                taskContainers[0]
-                    .thumbnailViewDeprecated
-                    .previewPositionHelper
-                    .setSplitBounds(
-                        convertLauncherSplitBoundsToShell(it),
-                        PreviewPositionHelper.STAGE_POSITION_TOP_OR_LEFT
-                    )
-                taskContainers[1]
-                    .thumbnailViewDeprecated
-                    .previewPositionHelper
-                    .setSplitBounds(
-                        convertLauncherSplitBoundsToShell(it),
-                        PreviewPositionHelper.STAGE_POSITION_BOTTOM_OR_RIGHT
-                    )
-            }
+        this.splitBoundsConfig = splitBoundsConfig
         taskContainers.forEach { it.digitalWellBeingToast?.setSplitBounds(splitBoundsConfig) }
         setOrientationState(orientedState)
     }
