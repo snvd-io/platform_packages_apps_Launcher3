@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.taskbar
+package com.android.launcher3.taskbar.rules
 
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.launcher3.InvariantDeviceProfile
-import com.android.launcher3.taskbar.TaskbarModeRule.Mode.PINNED
-import com.android.launcher3.taskbar.TaskbarModeRule.Mode.THREE_BUTTONS
-import com.android.launcher3.taskbar.TaskbarModeRule.Mode.TRANSIENT
-import com.android.launcher3.taskbar.TaskbarModeRule.TaskbarMode
+import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.PINNED
+import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.THREE_BUTTONS
+import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
+import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.MainThreadInitializedObject.SandboxContext

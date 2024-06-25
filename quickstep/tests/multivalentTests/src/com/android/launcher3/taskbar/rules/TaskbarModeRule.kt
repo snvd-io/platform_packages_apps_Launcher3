@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.taskbar
+package com.android.launcher3.taskbar.rules
 
-import com.android.launcher3.taskbar.TaskbarModeRule.Mode
-import com.android.launcher3.taskbar.TaskbarModeRule.TaskbarMode
+import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode
+import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.MainThreadInitializedObject
 import com.android.launcher3.util.MainThreadInitializedObject.SandboxContext
