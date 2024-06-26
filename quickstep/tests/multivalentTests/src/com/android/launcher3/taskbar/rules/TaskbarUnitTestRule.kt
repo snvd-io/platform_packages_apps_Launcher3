@@ -20,19 +20,25 @@ import android.app.Instrumentation
 import android.app.PendingIntent
 import android.content.IIntentSender
 import android.content.Intent
+import android.provider.Settings
+import android.provider.Settings.Secure.NAV_BAR_KIDS_MODE
+import android.provider.Settings.Secure.USER_SETUP_COMPLETE
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.ServiceTestRule
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.taskbar.TaskbarManager
 import com.android.launcher3.taskbar.TaskbarNavButtonController.TaskbarNavButtonCallbacks
+import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
 import com.android.launcher3.util.LauncherMultivalentJUnit.Companion.isRunningInRobolectric
+import com.android.launcher3.util.ModelTestExtensions.loadModelSync
 import com.android.launcher3.util.TestUtil
 import com.android.quickstep.AllAppsActionManager
 import com.android.quickstep.TouchInteractionService
 import com.android.quickstep.TouchInteractionService.TISBinder
 import org.junit.Assume.assumeTrue
+import org.junit.rules.RuleChain
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
@@ -71,6 +77,10 @@ class TaskbarUnitTestRule(
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val serviceTestRule = ServiceTestRule()
 
+    private val userSetupCompleteRule = TaskbarSecureSettingRule(USER_SETUP_COMPLETE)
+    private val kidsModeRule = TaskbarSecureSettingRule(NAV_BAR_KIDS_MODE)
+    private val settingRules = RuleChain.outerRule(userSetupCompleteRule).around(kidsModeRule)
+
     private lateinit var taskbarManager: TaskbarManager
 
     val activityContext: TaskbarActivityContext
@@ -80,12 +90,31 @@ class TaskbarUnitTestRule(
         }
 
     override fun apply(base: Statement, description: Description): Statement {
+        return settingRules.apply(createStatement(base, description), description)
+    }
+
+    private fun createStatement(base: Statement, description: Description): Statement {
         return object : Statement() {
             override fun evaluate() {
 
+                // Only run test when Taskbar is enabled.
                 instrumentation.runOnMainSync {
                     assumeTrue(
                         LauncherAppState.getIDP(context).getDeviceProfile(context).isTaskbarPresent
+                    )
+                }
+
+                // Process secure setting annotations.
+                instrumentation.runOnMainSync {
+                    userSetupCompleteRule.putInt(
+                        if (description.getAnnotation(UserSetupMode::class.java) != null) {
+                            0
+                        } else {
+                            1
+                        }
+                    )
+                    kidsModeRule.putInt(
+                        if (description.getAnnotation(NavBarKidsMode::class.java) != null) 1 else 0
                     )
                 }
 
@@ -117,6 +146,8 @@ class TaskbarUnitTestRule(
                     }
 
                 try {
+                    LauncherAppState.getInstance(context).model.loadModelSync()
+
                     // Replace Launcher Taskbar window with test instance.
                     instrumentation.runOnMainSync {
                         launcherTaskbarManager?.setSuspended(true)
@@ -167,4 +198,35 @@ class TaskbarUnitTestRule(
     @Retention(AnnotationRetention.RUNTIME)
     @Target(AnnotationTarget.FIELD)
     annotation class InjectController
+
+    /** Overrides [USER_SETUP_COMPLETE] to be `false` for tests. */
+    @Retention(AnnotationRetention.RUNTIME)
+    @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
+    annotation class UserSetupMode
+
+    /** Overrides [NAV_BAR_KIDS_MODE] to be `true` for tests. */
+    @Retention(AnnotationRetention.RUNTIME)
+    @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
+    annotation class NavBarKidsMode
+
+    /** Rule for Taskbar integer-based secure settings. */
+    private inner class TaskbarSecureSettingRule(private val settingName: String) : TestRule {
+
+        override fun apply(base: Statement, description: Description): Statement {
+            return object : Statement() {
+                override fun evaluate() {
+                    val originalValue =
+                        Settings.Secure.getInt(context.contentResolver, settingName, /* def= */ 0)
+                    try {
+                        base.evaluate()
+                    } finally {
+                        instrumentation.runOnMainSync { putInt(originalValue) }
+                    }
+                }
+            }
+        }
+
+        /** Puts [value] into secure settings under [settingName]. */
+        fun putInt(value: Int) = Settings.Secure.putInt(context.contentResolver, settingName, value)
+    }
 }
