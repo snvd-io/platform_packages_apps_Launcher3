@@ -65,9 +65,8 @@ class TaskbarAllAppsControllerTest {
     }
 
     @Test
-    @UiThreadTest
     fun testToggle_taskbarRecreated_allAppsReopened() {
-        allAppsController.toggle()
+        getInstrumentation().runOnMainSync { allAppsController.toggle() }
         taskbarUnitTestRule.recreateTaskbar()
         assertThat(allAppsController.isOpen).isTrue()
     }

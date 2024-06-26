@@ -135,7 +135,7 @@ class TaskbarUnitTestRule(private val testInstance: Any, private val context: Co
 
     /** Simulates Taskbar recreation lifecycle. */
     fun recreateTaskbar() {
-        taskbarManager.recreateTaskbar()
+        instrumentation.runOnMainSync { taskbarManager.recreateTaskbar() }
         injectControllers()
     }
 

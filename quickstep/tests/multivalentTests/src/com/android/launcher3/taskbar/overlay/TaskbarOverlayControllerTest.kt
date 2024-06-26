@@ -150,9 +150,10 @@ class TaskbarOverlayControllerTest {
     }
 
     @Test
-    @UiThreadTest
     fun testRecreateTaskbar_closesWindow() {
-        TestOverlayView.show(overlayController.requestWindow())
+        getInstrumentation().runOnMainSync {
+            TestOverlayView.show(overlayController.requestWindow())
+        }
         taskbarUnitTestRule.recreateTaskbar()
         assertThat(hasOpenView(taskbarContext, TYPE_TASKBAR_OVERLAY_PROXY)).isFalse()
     }
