@@ -323,6 +323,30 @@ public class WidgetsTwoPaneSheet extends WidgetsFullSheet {
     }
 
     @Override
+    @Px
+    protected int getAvailableWidthForSuggestions(int pickerAvailableWidth) {
+        int rightPaneWidth = (int) Math.ceil(0.67 * pickerAvailableWidth);
+
+        if (mDeviceProfile.isTwoPanels && enableUnfoldedTwoPanePicker()) {
+            // See onLayout
+            int leftPaneWidth = (int) (0.33 * pickerAvailableWidth);
+            @Px int minLeftPaneWidthPx = Utilities.dpToPx(MINIMUM_WIDTH_LEFT_PANE_FOLDABLE_DP);
+            @Px int maxLeftPaneWidthPx = Utilities.dpToPx(MAXIMUM_WIDTH_LEFT_PANE_FOLDABLE_DP);
+            if (leftPaneWidth < minLeftPaneWidthPx) {
+                leftPaneWidth = minLeftPaneWidthPx;
+            } else if (leftPaneWidth > maxLeftPaneWidthPx) {
+                leftPaneWidth = maxLeftPaneWidthPx;
+            }
+            rightPaneWidth = pickerAvailableWidth - leftPaneWidth;
+        }
+
+        // Since suggestions are shown in right pane, the available width is 2/3 of total width of
+        // bottom sheet.
+        return rightPaneWidth - getResources().getDimensionPixelSize(
+                R.dimen.widget_list_horizontal_margin_two_pane); // right pane end margin.
+    }
+
+    @Override
     public void onActivePageChanged(int currentActivePage) {
         super.onActivePageChanged(currentActivePage);
 
@@ -382,11 +406,6 @@ public class WidgetsTwoPaneSheet extends WidgetsFullSheet {
             mAdapters.get(mActivePage).mWidgetsListAdapter.selectFirstHeaderEntry();
         }
 
-    }
-
-    @Override
-    protected View getContentView() {
-        return mRightPane;
     }
 
     private HeaderChangeListener getHeaderChangeListener() {
