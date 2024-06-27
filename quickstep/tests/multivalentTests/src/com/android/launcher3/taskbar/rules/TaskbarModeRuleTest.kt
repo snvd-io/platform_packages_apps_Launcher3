@@ -24,7 +24,6 @@ import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.LauncherMultivalentJUnit
-import com.android.launcher3.util.MainThreadInitializedObject.SandboxContext
 import com.android.launcher3.util.NavigationMode
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
@@ -34,7 +33,7 @@ import org.junit.runner.RunWith
 @RunWith(LauncherMultivalentJUnit::class)
 class TaskbarModeRuleTest {
 
-    private val context = SandboxContext(getInstrumentation().targetContext)
+    private val context = TaskbarWindowSandboxContext.create(getInstrumentation().targetContext)
 
     @get:Rule val taskbarModeRule = TaskbarModeRule(context)
 

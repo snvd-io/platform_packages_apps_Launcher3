@@ -24,7 +24,6 @@ import com.android.launcher3.taskbar.TaskbarStashController
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
-import com.android.launcher3.util.MainThreadInitializedObject.SandboxContext
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -36,7 +35,7 @@ import org.junit.runners.model.Statement
 @EmulatedDevices(["pixelFoldable2023"])
 class TaskbarUnitTestRuleTest {
 
-    private val context = SandboxContext(getInstrumentation().targetContext)
+    private val context = TaskbarWindowSandboxContext.create(getInstrumentation().targetContext)
 
     @Test
     fun testSetup_taskbarInitialized() {

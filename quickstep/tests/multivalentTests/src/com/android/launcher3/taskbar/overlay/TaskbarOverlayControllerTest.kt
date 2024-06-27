@@ -28,6 +28,7 @@ import com.android.launcher3.AbstractFloatingView.hasOpenView
 import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
+import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
 import com.android.launcher3.views.BaseDragLayer
@@ -42,7 +43,11 @@ import org.junit.runner.RunWith
 class TaskbarOverlayControllerTest {
 
     @get:Rule
-    val taskbarUnitTestRule = TaskbarUnitTestRule(this, getInstrumentation().targetContext)
+    val taskbarUnitTestRule =
+        TaskbarUnitTestRule(
+            this,
+            TaskbarWindowSandboxContext.create(getInstrumentation().targetContext),
+        )
     @InjectController lateinit var overlayController: TaskbarOverlayController
 
     private val taskbarContext: TaskbarActivityContext

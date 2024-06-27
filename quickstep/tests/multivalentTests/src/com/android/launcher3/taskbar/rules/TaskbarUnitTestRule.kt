@@ -18,7 +18,6 @@ package com.android.launcher3.taskbar.rules
 
 import android.app.Instrumentation
 import android.app.PendingIntent
-import android.content.Context
 import android.content.IIntentSender
 import android.content.Intent
 import androidx.test.platform.app.InstrumentationRegistry
@@ -64,7 +63,11 @@ import org.junit.runners.model.Statement
  * }
  * ```
  */
-class TaskbarUnitTestRule(private val testInstance: Any, private val context: Context) : TestRule {
+class TaskbarUnitTestRule(
+    private val testInstance: Any,
+    private val context: TaskbarWindowSandboxContext,
+) : TestRule {
+
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val serviceTestRule = ServiceTestRule()
 
