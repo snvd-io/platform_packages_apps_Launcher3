@@ -227,7 +227,8 @@ class SplitAnimationControllerTest {
             depthController,
             null /* info */,
             null /* t */,
-            {} /* finishCallback */
+            {} /* finishCallback */,
+            1f /* cornerRadius */
         )
 
         verify(spySplitAnimationController)
@@ -263,7 +264,8 @@ class SplitAnimationControllerTest {
             depthController,
             transitionInfo,
             transaction,
-            {} /* finishCallback */
+            {} /* finishCallback */,
+            1f /* cornerRadius */
         )
 
         verify(spySplitAnimationController)
@@ -291,7 +293,8 @@ class SplitAnimationControllerTest {
             depthController,
             transitionInfo,
             transaction,
-            {} /* finishCallback */
+            {} /* finishCallback */,
+            1f /* cornerRadius */
         )
 
         verify(spySplitAnimationController)
@@ -319,7 +322,8 @@ class SplitAnimationControllerTest {
             depthController,
             transitionInfo,
             transaction,
-            {} /* finishCallback */
+            {} /* finishCallback */,
+            1f /* cornerRadius */
         )
 
         verify(spySplitAnimationController)
@@ -346,7 +350,8 @@ class SplitAnimationControllerTest {
             depthController,
             transitionInfo,
             transaction,
-            {} /* finishCallback */
+            {} /* finishCallback */,
+            1f /* cornerRadius */
         )
 
         verify(spySplitAnimationController)
@@ -373,7 +378,8 @@ class SplitAnimationControllerTest {
             depthController,
             transitionInfo,
             transaction,
-            {} /* finishCallback */
+            {} /* finishCallback */,
+            1f /* cornerRadius */
         )
 
         verify(spySplitAnimationController)
@@ -385,7 +391,7 @@ class SplitAnimationControllerTest {
         val spySplitAnimationController = spy(splitAnimationController)
         doNothing()
             .whenever(spySplitAnimationController)
-            .composeFadeInSplitLaunchAnimator(any(), any(), any(), any(), any())
+            .composeFadeInSplitLaunchAnimator(any(), any(), any(), any(), any(), any())
 
         spySplitAnimationController.playSplitLaunchAnimation(
             null /* launchingTaskView */,
@@ -399,10 +405,11 @@ class SplitAnimationControllerTest {
             depthController,
             transitionInfo,
             transaction,
-            {} /* finishCallback */
+            {} /* finishCallback */,
+            1f /* cornerRadius */
         )
 
         verify(spySplitAnimationController)
-            .composeFadeInSplitLaunchAnimator(any(), any(), any(), any(), any())
+            .composeFadeInSplitLaunchAnimator(any(), any(), any(), any(), any(), any())
     }
 }
