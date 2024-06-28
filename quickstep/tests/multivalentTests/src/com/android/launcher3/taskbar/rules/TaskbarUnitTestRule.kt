@@ -119,18 +119,14 @@ class TaskbarUnitTestRule(
                 try {
                     // Replace Launcher Taskbar window with test instance.
                     instrumentation.runOnMainSync {
-                        launcherTaskbarManager?.removeTaskbarRootViewFromWindow()
+                        launcherTaskbarManager?.destroy()
                         taskbarManager.onUserUnlocked() // Required to complete initialization.
                     }
 
                     injectControllers()
                     base.evaluate()
                 } finally {
-                    // Revert Taskbar window.
-                    instrumentation.runOnMainSync {
-                        taskbarManager.destroy()
-                        launcherTaskbarManager?.addTaskbarRootViewToWindow()
-                    }
+                    instrumentation.runOnMainSync { taskbarManager.destroy() }
                 }
             }
         }
