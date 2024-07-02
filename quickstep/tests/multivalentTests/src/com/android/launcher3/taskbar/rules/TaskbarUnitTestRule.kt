@@ -28,6 +28,7 @@ import com.android.launcher3.taskbar.TaskbarManager
 import com.android.launcher3.taskbar.TaskbarNavButtonController.TaskbarNavButtonCallbacks
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
 import com.android.launcher3.util.LauncherMultivalentJUnit.Companion.isRunningInRobolectric
+import com.android.launcher3.util.TestUtil
 import com.android.quickstep.AllAppsActionManager
 import com.android.quickstep.TouchInteractionService
 import com.android.quickstep.TouchInteractionService.TISBinder
@@ -48,12 +49,11 @@ import org.junit.runners.model.Statement
  * that code that is executed on the main thread in production should also happen on that thread
  * when tested.
  *
- * `@UiThreadTest` is a simple way to run an entire test body on the main thread. But if a test
- * executes code that appends message(s) to the main thread's `MessageQueue`, the annotation will
- * prevent those messages from being processed until after the test body finishes.
+ * `@UiThreadTest` is incompatible with this rule. The annotation causes this rule to run on the
+ * main thread, but it needs to be run on the test thread for it to work properly. Instead, only run
+ * code that requires the main thread using something like [Instrumentation.runOnMainSync] or
+ * [TestUtil.getOnUiThread].
  *
- * To test pending messages, instead use something like [Instrumentation.runOnMainSync] to perform
- * only sections of the test body on the main thread synchronously:
  * ```
  * @Test
  * fun example() {
@@ -105,8 +105,8 @@ class TaskbarUnitTestRule(
                         null
                     }
 
-                instrumentation.runOnMainSync {
-                    taskbarManager =
+                taskbarManager =
+                    TestUtil.getOnUiThread {
                         TaskbarManager(
                             context,
                             AllAppsActionManager(context, UI_HELPER_EXECUTOR) {
@@ -114,7 +114,7 @@ class TaskbarUnitTestRule(
                             },
                             object : TaskbarNavButtonCallbacks {},
                         )
-                }
+                    }
 
                 try {
                     // Replace Launcher Taskbar window with test instance.
