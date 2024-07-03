@@ -1649,6 +1649,10 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         return mControllers.uiController.canToggleHomeAllApps();
     }
 
+    boolean isIconAlignedWithHotseat() {
+        return mControllers.uiController.isIconAlignedWithHotseat();
+    }
+
     @VisibleForTesting
     public TaskbarControllers getControllers() {
         return mControllers;
