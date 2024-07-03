@@ -135,7 +135,6 @@ import com.android.internal.jank.Cuj;
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.BaseActivity.MultiWindowModeChangedListener;
 import com.android.launcher3.DeviceProfile;
-import com.android.launcher3.Flags;
 import com.android.launcher3.Insettable;
 import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.PagedView;
@@ -1017,14 +1016,17 @@ public abstract class RecentsView<CONTAINER_TYPE extends Context & RecentsViewCo
     @Nullable
     public Task onTaskThumbnailChanged(int taskId, ThumbnailData thumbnailData) {
         if (mHandleTaskStackChanges) {
-            TaskView taskView = getTaskViewByTaskId(taskId);
-            if (taskView != null) {
-                for (TaskContainer container : taskView.getTaskContainers()) {
-                    if (container == null || taskId != container.getTask().key.id) {
-                        continue;
+            // TODO(b/342560598): Handle onTaskThumbnailChanged for new TTV.
+            if (!enableRefactorTaskThumbnail()) {
+                TaskView taskView = getTaskViewByTaskId(taskId);
+                if (taskView != null) {
+                    for (TaskContainer container : taskView.getTaskContainers()) {
+                        if (container == null || taskId != container.getTask().key.id) {
+                            continue;
+                        }
+                        container.getThumbnailViewDeprecated().setThumbnail(container.getTask(),
+                                thumbnailData);
                     }
-                    container.getThumbnailViewDeprecated().setThumbnail(container.getTask(),
-                            thumbnailData);
                 }
             }
         }
@@ -1061,6 +1063,10 @@ public abstract class RecentsView<CONTAINER_TYPE extends Context & RecentsViewCo
     @Nullable
     public TaskView updateThumbnail(
             HashMap<Integer, ThumbnailData> thumbnailData, boolean refreshNow) {
+        if (enableRefactorTaskThumbnail()) {
+            // TODO(b/342560598): Handle updateThumbnail for new TTV.
+            return null;
+        }
         TaskView updatedTaskView = null;
         for (Map.Entry<Integer, ThumbnailData> entry : thumbnailData.entrySet()) {
             Integer id = entry.getKey();
@@ -2915,7 +2921,7 @@ public abstract class RecentsView<CONTAINER_TYPE extends Context & RecentsViewCo
         int prevRunningTaskViewId = mRunningTaskViewId;
         mRunningTaskViewId = runningTaskViewId;
 
-        if (Flags.enableRefactorTaskThumbnail()) {
+        if (enableRefactorTaskThumbnail()) {
             TaskView previousRunningTaskView = getTaskViewFromTaskViewId(prevRunningTaskViewId);
             if (previousRunningTaskView != null) {
                 previousRunningTaskView.notifyIsRunningTaskUpdated();
@@ -4861,14 +4867,16 @@ public abstract class RecentsView<CONTAINER_TYPE extends Context & RecentsViewCo
                     == mSplitSelectStateController.getInitialTaskId();
             TaskContainer taskContainer = mSplitHiddenTaskView
                     .getTaskContainers().get(primaryTaskSelected ? 1 : 0);
-            TaskThumbnailViewDeprecated thumbnail = taskContainer.getThumbnailViewDeprecated();
             mSplitSelectStateController.getSplitAnimationController()
                     .addInitialSplitFromPair(taskContainer, builder,
                             mContainer.getDeviceProfile(),
                             mSplitHiddenTaskView.getWidth(), mSplitHiddenTaskView.getHeight(),
                             primaryTaskSelected);
             builder.addOnFrameCallback(() ->{
-                thumbnail.refreshSplashView();
+                // TODO(b/334826842): Handle splash icon for new TTV.
+                if (!enableRefactorTaskThumbnail()) {
+                    taskContainer.getThumbnailViewDeprecated().refreshSplashView();
+                }
                 mSplitHiddenTaskView.updateSnapshotRadius();
             });
         } else if (isInitiatingSplitFromTaskView) {
@@ -5260,7 +5268,7 @@ public abstract class RecentsView<CONTAINER_TYPE extends Context & RecentsViewCo
         updateGridProperties();
         updateScrollSynchronously();
 
-        int targetSysUiFlags = tv.getFirstThumbnailViewDeprecated().getSysUiStatusNavFlags();
+        int targetSysUiFlags = tv.getTaskContainers().getFirst().getSysUiStatusNavFlags();
         final boolean[] passedOverviewThreshold = new boolean[] {false};
         ValueAnimator progressAnim = ValueAnimator.ofFloat(0, 1);
         progressAnim.addUpdateListener(animator -> {
@@ -5986,6 +5994,12 @@ public abstract class RecentsView<CONTAINER_TYPE extends Context & RecentsViewCo
     }
 
     private void switchToScreenshotInternal(Runnable onFinishRunnable) {
+        // TODO(b/342560598): Handle switchToScreenshot for new TTV.
+        if (enableRefactorTaskThumbnail()) {
+            onFinishRunnable.run();
+            return;
+        }
+
         TaskView taskView = getRunningTaskView();
         if (taskView == null) {
             onFinishRunnable.run();

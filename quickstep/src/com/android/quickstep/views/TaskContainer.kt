@@ -64,6 +64,17 @@ class TaskContainer(
     val thumbnail: Bitmap?
         get() = thumbnailViewDeprecated.thumbnail
 
+    // TODO(b/334826842): Support shouldShowSplashView for new TTV.
+    val shouldShowSplashView: Boolean
+        get() =
+            if (enableRefactorTaskThumbnail()) false
+            else thumbnailViewDeprecated.shouldShowSplashView()
+
+    // TODO(b/350743460) Support sysUiStatusNavFlags for new TTV.
+    val sysUiStatusNavFlags: Int
+        get() =
+            if (enableRefactorTaskThumbnail()) 0 else thumbnailViewDeprecated.sysUiStatusNavFlags
+
     /** Builds proto for logging */
     val itemInfo: WorkspaceItemInfo
         get() =
