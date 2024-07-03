@@ -1394,10 +1394,8 @@ constructor(
     }
 
     open fun setOverlayEnabled(overlayEnabled: Boolean) {
-        // TODO(b/335606129) Investigate the usage of [TaskOverlay] in the new TaskThumbnailView.
-        //  and if it's still necessary we should support that in the new TTV class.
         if (!enableRefactorTaskThumbnail()) {
-            taskContainers.forEach { it.thumbnailViewDeprecated.setOverlayEnabled(overlayEnabled) }
+            taskContainers.forEach { it.setOverlayEnabled(overlayEnabled) }
         }
     }
 
