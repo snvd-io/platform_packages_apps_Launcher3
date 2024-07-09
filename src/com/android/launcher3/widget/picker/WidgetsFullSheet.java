@@ -135,7 +135,7 @@ public class WidgetsFullSheet extends BaseWidgetSheet
     private WidgetsRecyclerView mCurrentTouchEventRecyclerView;
     @Nullable
     PersonalWorkPagedView mViewPager;
-    private boolean mIsInSearchMode;
+    protected boolean mIsInSearchMode;
     private boolean mIsNoWidgetsViewNeeded;
     @Px
     protected int mMaxSpanPerRow;
@@ -462,22 +462,28 @@ public class WidgetsFullSheet extends BaseWidgetSheet
         setTranslationShift(mTranslationShift);
     }
 
+    /**
+     * Returns all displayable widgets.
+     */
+    protected List<WidgetsListBaseEntry> getWidgetsToDisplay() {
+        return mActivityContext.getPopupDataProvider().getAllWidgets();
+    }
+
     @Override
     public void onWidgetsBound() {
         if (mIsInSearchMode) {
             return;
         }
-        List<WidgetsListBaseEntry> allWidgets =
-                mActivityContext.getPopupDataProvider().getAllWidgets();
+        List<WidgetsListBaseEntry> widgets = getWidgetsToDisplay();
 
         AdapterHolder primaryUserAdapterHolder = mAdapters.get(AdapterHolder.PRIMARY);
-        primaryUserAdapterHolder.mWidgetsListAdapter.setWidgets(allWidgets);
+        primaryUserAdapterHolder.mWidgetsListAdapter.setWidgets(widgets);
 
         if (mHasWorkProfile) {
             mViewPager.setVisibility(VISIBLE);
             mTabBar.setVisibility(VISIBLE);
             AdapterHolder workUserAdapterHolder = mAdapters.get(AdapterHolder.WORK);
-            workUserAdapterHolder.mWidgetsListAdapter.setWidgets(allWidgets);
+            workUserAdapterHolder.mWidgetsListAdapter.setWidgets(widgets);
             onActivePageChanged(mViewPager.getCurrentPage());
         } else {
             onActivePageChanged(0);

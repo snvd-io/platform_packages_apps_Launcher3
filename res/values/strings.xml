@@ -64,6 +64,9 @@
     <!-- Accessibility label for the icon button shown in the widget picker that opens a overflow
          menu with widgets viewing options. [CHAR_LIMIT=25] -->
     <string name="widget_picker_widget_options_button_description">More options</string>
+    <!-- Label for the checkbox shown in the widget picker toggles whether to show all widgets or
+     the default set. [CHAR_LIMIT=25] -->
+    <string name="widget_picker_show_all_widgets_menu_item_title">Show all widgets</string>
     <!-- The format string for the dimensions of a widget in the drawer -->
     <!-- There is a special version of this format string for Farsi -->
     <string name="widget_dims_format">%1$d \u00d7 %2$d</string>

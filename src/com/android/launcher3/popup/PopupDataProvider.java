@@ -284,8 +284,10 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
     }
 
     /** Gets the WidgetsListContentEntry for the currently selected header. */
-    public WidgetsListContentEntry getSelectedAppWidgets(PackageUserKey packageUserKey) {
-        return (WidgetsListContentEntry) mAllWidgets.stream()
+    public WidgetsListContentEntry getSelectedAppWidgets(PackageUserKey packageUserKey,
+            boolean useDefault) {
+        List<WidgetsListBaseEntry> widgets = useDefault ? mDefaultWidgets : mAllWidgets;
+        return (WidgetsListContentEntry) widgets.stream()
                 .filter(row -> row instanceof WidgetsListContentEntry
                         && PackageUserKey.fromPackageItemInfo(row.mPkgItem).equals(packageUserKey))
                 .findAny()
