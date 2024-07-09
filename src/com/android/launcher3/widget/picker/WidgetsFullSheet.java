@@ -69,6 +69,7 @@ import com.android.launcher3.widget.WidgetCell;
 import com.android.launcher3.widget.model.WidgetsListBaseEntry;
 import com.android.launcher3.widget.picker.search.SearchModeListener;
 import com.android.launcher3.widget.picker.search.WidgetsSearchBar;
+import com.android.launcher3.widget.picker.search.WidgetsSearchBar.WidgetsSearchDataProvider;
 import com.android.launcher3.workprofile.PersonalWorkPagedView;
 import com.android.launcher3.workprofile.PersonalWorkSlidingTabStrip.OnActivePageChangedListener;
 
@@ -245,8 +246,12 @@ public class WidgetsFullSheet extends BaseWidgetSheet
         mSearchBarContainer = mSearchScrollView.findViewById(R.id.search_bar_container);
         mSearchBar = mSearchScrollView.findViewById(R.id.widgets_search_bar);
 
-        mSearchBar.initialize(
-                mActivityContext.getPopupDataProvider(), /* searchModeListener= */ this);
+        mSearchBar.initialize(new WidgetsSearchDataProvider() {
+            @Override
+            public List<WidgetsListBaseEntry> getWidgets() {
+                return getWidgetsToDisplay();
+            }
+        }, /* searchModeListener= */ this);
     }
 
     private void setDeviceManagementResources() {
