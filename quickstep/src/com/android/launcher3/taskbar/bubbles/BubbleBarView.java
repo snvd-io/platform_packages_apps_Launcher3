@@ -46,7 +46,6 @@ import com.android.launcher3.R;
 import com.android.launcher3.anim.SpringAnimationBuilder;
 import com.android.launcher3.taskbar.bubbles.animation.BubbleAnimator;
 import com.android.launcher3.util.DisplayController;
-import com.android.wm.shell.Flags;
 import com.android.wm.shell.common.bubbles.BubbleBarLocation;
 
 import java.util.List;
@@ -256,10 +255,6 @@ public class BubbleBarView extends FrameLayout {
      */
     public void animateBubbleBarIconSize(float newIconSize, float newBubbleBarPadding) {
         if (!isIconSizeOrPaddingUpdated(newIconSize, newBubbleBarPadding)) {
-            return;
-        }
-        if (!Flags.animateBubbleSizeChange()) {
-            setIconSizeAndPadding(newIconSize, newBubbleBarPadding);
             return;
         }
         if (mScalePaddingAnimator != null && mScalePaddingAnimator.isRunning()) {
