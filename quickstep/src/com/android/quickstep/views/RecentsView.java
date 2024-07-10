@@ -461,7 +461,9 @@ public abstract class RecentsView<CONTAINER_TYPE extends Context & RecentsViewCo
 
     private static final float FOREGROUND_SCRIM_TINT = 0.32f;
 
+    @Nullable
     public final RecentsViewData mRecentsViewData = new RecentsViewData();
+    @Nullable
     public final TasksRepository mTasksRepository;
 
     protected final RecentsOrientedState mOrientationState;

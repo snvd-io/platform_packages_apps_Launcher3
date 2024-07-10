@@ -1179,7 +1179,7 @@ constructor(
             container.task,
             container.iconView.drawable,
             container.snapshotView,
-            container.thumbnail,
+            container.splitAnimationThumbnail,
             /* intent */ null,
             /* user */ null,
             container.itemInfo
