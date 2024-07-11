@@ -29,6 +29,7 @@ import com.android.quickstep.LauncherActivityInterface;
 import com.android.quickstep.RecentsModel;
 import com.android.quickstep.util.DesktopTask;
 import com.android.quickstep.util.GroupTask;
+import com.android.quickstep.util.LayoutUtils;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.recents.model.ThumbnailData;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -298,6 +299,11 @@ public final class KeyboardQuickSwitchController implements
 
         boolean isFirstTaskRunning() {
             return isTaskRunning(getTaskAt(0));
+        }
+
+        boolean isAspectRatioSquare() {
+            return mControllers != null && LayoutUtils.isAspectRatioSquare(
+                    mControllers.taskbarActivityContext.getDeviceProfile().aspectRatio);
         }
     }
 }

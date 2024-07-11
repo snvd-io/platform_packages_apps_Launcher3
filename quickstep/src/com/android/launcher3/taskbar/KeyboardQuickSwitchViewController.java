@@ -279,5 +279,9 @@ public class KeyboardQuickSwitchViewController {
         void updateIconInBackground(Task task, Consumer<Task> callback) {
             mControllerCallbacks.updateIconInBackground(task, callback);
         }
+
+        boolean isAspectRatioSquare() {
+            return mControllerCallbacks.isAspectRatioSquare();
+        }
     }
 }

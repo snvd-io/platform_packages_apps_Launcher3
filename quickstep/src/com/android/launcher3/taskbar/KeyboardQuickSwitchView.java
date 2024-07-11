@@ -204,7 +204,9 @@ public class KeyboardQuickSwitchView extends ConstraintLayout {
                     /* isFinalView= */ i == tasksToDisplay - 1
                             && numHiddenTasks == 0 && !useDesktopTaskView,
                     /* useSmallStartSpacing= */ false,
-                    R.layout.keyboard_quick_switch_taskview,
+                    mViewCallbacks.isAspectRatioSquare()
+                            ? R.layout.keyboard_quick_switch_taskview_square
+                            : R.layout.keyboard_quick_switch_taskview,
                     layoutInflater,
                     previousTaskView);
 
