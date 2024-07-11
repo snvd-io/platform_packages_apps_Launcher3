@@ -169,6 +169,7 @@ public class TaplTwoPanelWorkspaceTest extends AbstractLauncherUiTest<Launcher> 
 
     @Test
     @PortraitLandscape
+    @ScreenRecordRule.ScreenRecord // b/352130094
     public void testDragIconToPage2() {
         Workspace workspace = mLauncher.getWorkspace();
 
