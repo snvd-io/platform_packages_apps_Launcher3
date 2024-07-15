@@ -16,11 +16,15 @@
 
 package com.android.launcher3.taskbar.rules
 
+import android.platform.test.flag.junit.FlagsParameterization
+import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.launcher3.ConstantItem
+import com.android.launcher3.Flags.FLAG_ENABLE_TASKBAR_PINNING
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING
 import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING_IN_DESKTOP_MODE
+import com.android.launcher3.util.DisplayController
 import kotlin.reflect.KProperty
 import org.junit.rules.TestRule
 import org.junit.runner.Description
@@ -40,13 +44,20 @@ import org.junit.runners.model.Statement
 class TaskbarPinningPreferenceRule(context: TaskbarWindowSandboxContext) : TestRule {
 
     private val prefs = LauncherPrefs.get(context)
+    private val setFlagsRule =
+        SetFlagsRule(FlagsParameterization(mapOf(FLAG_ENABLE_TASKBAR_PINNING to true)))
 
     var isPinned by PinningPreference(TASKBAR_PINNING)
     var isPinnedInDesktopMode by PinningPreference(TASKBAR_PINNING_IN_DESKTOP_MODE)
 
     override fun apply(base: Statement, description: Description): Statement {
+        return setFlagsRule.apply(createStatement(base), description)
+    }
+
+    private fun createStatement(base: Statement): Statement {
         return object : Statement() {
             override fun evaluate() {
+                DisplayController.enableTaskbarModePreferenceForTests(true)
                 val wasPinned = isPinned
                 val wasPinnedInDesktopMode = isPinnedInDesktopMode
                 try {
@@ -54,6 +65,7 @@ class TaskbarPinningPreferenceRule(context: TaskbarWindowSandboxContext) : TestR
                 } finally {
                     isPinned = wasPinned
                     isPinnedInDesktopMode = wasPinnedInDesktopMode
+                    DisplayController.enableTaskbarModePreferenceForTests(false)
                 }
             }
         }

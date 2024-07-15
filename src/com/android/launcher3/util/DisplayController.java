@@ -76,6 +76,7 @@ public class DisplayController implements ComponentCallbacks, SafeCloseable {
 
     private static final String TAG = "DisplayController";
     private static final boolean DEBUG = false;
+    private static boolean sTaskbarModePreferenceStatusForTests = false;
     private static boolean sTransientTaskbarStatusForTests = true;
 
     // TODO(b/254119092) remove all logs with this tag
@@ -200,6 +201,14 @@ public class DisplayController implements ComponentCallbacks, SafeCloseable {
     @VisibleForTesting
     public static void enableTransientTaskbarForTests(boolean enable) {
         sTransientTaskbarStatusForTests = enable;
+    }
+
+    /**
+     * Enables respecting taskbar mode preference during test.
+     */
+    @VisibleForTesting
+    public static void enableTaskbarModePreferenceForTests(boolean enable) {
+        sTaskbarModePreferenceStatusForTests = enable;
     }
 
     /**
@@ -461,7 +470,7 @@ public class DisplayController implements ComponentCallbacks, SafeCloseable {
             if (navigationMode != NavigationMode.NO_BUTTON) {
                 return false;
             }
-            if (Utilities.isRunningInTestHarness()) {
+            if (Utilities.isRunningInTestHarness() && !sTaskbarModePreferenceStatusForTests) {
                 // TODO(b/258604917): Once ENABLE_TASKBAR_PINNING is enabled, remove usage of
                 //  sTransientTaskbarStatusForTests and update test to directly
                 //  toggle shared preference to switch transient taskbar on/off.
