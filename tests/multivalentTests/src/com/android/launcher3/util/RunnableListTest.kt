@@ -24,7 +24,7 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.reset
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyZeroInteractions
+import org.mockito.kotlin.verifyNoMoreInteractions
 
 @SmallTest
 class RunnableListTest {
@@ -73,7 +73,7 @@ class RunnableListTest {
 
         underTest.executeAllAndDestroy()
 
-        verifyZeroInteractions(runnable1)
+        verifyNoMoreInteractions(runnable1)
     }
 
     @Test
@@ -107,7 +107,7 @@ class RunnableListTest {
         underTest.remove(runnable1)
         underTest.executeAllAndClear()
 
-        verifyZeroInteractions(runnable1)
+        verifyNoMoreInteractions(runnable1)
         verify(runnable2).run()
     }
 }
