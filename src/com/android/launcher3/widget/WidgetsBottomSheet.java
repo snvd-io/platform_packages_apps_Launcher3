@@ -247,4 +247,7 @@ public class WidgetsBottomSheet extends BaseWidgetSheet {
             }
         }
     }
+
+    @Override
+    public void onRecommendedWidgetsBound() {} // no op
 }
