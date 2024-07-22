@@ -64,8 +64,8 @@ import static com.android.quickstep.util.ActiveGestureErrorDetector.GestureEvent
 import static com.android.quickstep.util.ActiveGestureErrorDetector.GestureEvent.QUICK_SWITCH_FROM_HOME_FALLBACK;
 import static com.android.quickstep.util.AnimUtils.completeRunnableListCallback;
 import static com.android.quickstep.util.SplitAnimationTimings.TABLET_HOME_TO_SPLIT;
+import static com.android.wm.shell.shared.desktopmode.DesktopModeFlags.WALLPAPER_ACTIVITY;
 import static com.android.systemui.shared.system.ActivityManagerWrapper.CLOSE_SYSTEM_WINDOWS_REASON_HOME_KEY;
-import static com.android.window.flags.Flags.enableDesktopWindowingWallpaperActivity;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_50_50;
 import static com.android.wm.shell.shared.desktopmode.DesktopModeFlags.DESKTOP_WINDOWING_MODE;
 
@@ -1004,7 +1004,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer 
 
     @Override
     public void setResumed() {
-        if (!enableDesktopWindowingWallpaperActivity()
+        if (!WALLPAPER_ACTIVITY.isEnabled(this)
                 && mDesktopVisibilityController != null
                 && mDesktopVisibilityController.areDesktopTasksVisible()
                 && !mDesktopVisibilityController.isRecentsGestureInProgress()) {

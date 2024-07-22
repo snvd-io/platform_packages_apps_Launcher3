@@ -63,6 +63,7 @@ import static com.android.quickstep.util.ActiveGestureErrorDetector.GestureEvent
 import static com.android.quickstep.views.RecentsView.UPDATE_SYSUI_FLAGS_THRESHOLD;
 import static com.android.systemui.shared.system.ActivityManagerWrapper.CLOSE_SYSTEM_WINDOWS_REASON_RECENTS;
 import static com.android.wm.shell.shared.desktopmode.DesktopModeFlags.DESKTOP_WINDOWING_MODE;
+import static com.android.wm.shell.shared.desktopmode.DesktopModeFlags.WALLPAPER_ACTIVITY;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -1274,7 +1275,7 @@ public abstract class AbsSwipeUpHandler<T extends RecentsViewContainer,
                 ? mRecentsView.getCurrentPageTaskView() : null;
 
         if (DESKTOP_WINDOWING_MODE.isEnabled(mContext)
-                && !(Flags.enableDesktopWindowingWallpaperActivity()
+                && !(WALLPAPER_ACTIVITY.isEnabled(mContext)
                 && Flags.enableDesktopWindowingQuickSwitch())) {
             if ((nextPageTaskView instanceof DesktopTaskView
                     || currentPageTaskView instanceof DesktopTaskView)
@@ -1447,7 +1448,7 @@ public abstract class AbsSwipeUpHandler<T extends RecentsViewContainer,
         };
 
         if (DESKTOP_WINDOWING_MODE.isEnabled(mContext)
-                && !(Flags.enableDesktopWindowingWallpaperActivity()
+                && !(WALLPAPER_ACTIVITY.isEnabled(mContext)
                 && Flags.enableDesktopWindowingQuickSwitch())) {
             if (mRecentsView != null && (mRecentsView.getCurrentPageTaskView() != null
                     && !(mRecentsView.getCurrentPageTaskView() instanceof DesktopTaskView))) {
@@ -2295,7 +2296,7 @@ public abstract class AbsSwipeUpHandler<T extends RecentsViewContainer,
         });
 
         if (DESKTOP_WINDOWING_MODE.isEnabled(mContext)
-                && !(Flags.enableDesktopWindowingWallpaperActivity()
+                && !(WALLPAPER_ACTIVITY.isEnabled(mContext)
                         && Flags.enableDesktopWindowingQuickSwitch())) {
             if (mRecentsView.getNextPageTaskView() instanceof DesktopTaskView
                     || mRecentsView.getCurrentPageTaskView() instanceof DesktopTaskView) {
