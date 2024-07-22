@@ -62,6 +62,7 @@ import static com.android.quickstep.util.ActiveGestureErrorDetector.GestureEvent
 import static com.android.quickstep.util.ActiveGestureErrorDetector.GestureEvent.ON_SETTLED_ON_END_TARGET;
 import static com.android.quickstep.views.RecentsView.UPDATE_SYSUI_FLAGS_THRESHOLD;
 import static com.android.systemui.shared.system.ActivityManagerWrapper.CLOSE_SYSTEM_WINDOWS_REASON_RECENTS;
+import static com.android.wm.shell.shared.desktopmode.DesktopModeFlags.DESKTOP_WINDOWING_MODE;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -152,6 +153,8 @@ import com.android.window.flags.Flags;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.startingsurface.SplashScreenExitAnimationUtils;
 
+import kotlin.Unit;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -160,8 +163,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.Consumer;
-
-import kotlin.Unit;
 
 /**
  * Handles the navigation gestures when Launcher is the default home activity.
@@ -952,7 +953,7 @@ public abstract class AbsSwipeUpHandler<T extends RecentsViewContainer,
     public void onRecentsAnimationStart(RecentsAnimationController controller,
             RecentsAnimationTargets targets) {
         super.onRecentsAnimationStart(controller, targets);
-        if (targets.hasDesktopTasks()) {
+        if (targets.hasDesktopTasks(mContext)) {
             mRemoteTargetHandles = mTargetGluer.assignTargetsForDesktop(targets);
         } else {
             int untrimmedAppCount = mRemoteTargetHandles.length;
@@ -1272,7 +1273,7 @@ public abstract class AbsSwipeUpHandler<T extends RecentsViewContainer,
         TaskView currentPageTaskView = mRecentsView != null
                 ? mRecentsView.getCurrentPageTaskView() : null;
 
-        if (Flags.enableDesktopWindowingMode()
+        if (DESKTOP_WINDOWING_MODE.isEnabled(mContext)
                 && !(Flags.enableDesktopWindowingWallpaperActivity()
                 && Flags.enableDesktopWindowingQuickSwitch())) {
             if ((nextPageTaskView instanceof DesktopTaskView
@@ -1445,7 +1446,7 @@ public abstract class AbsSwipeUpHandler<T extends RecentsViewContainer,
             setClampScrollOffset(false);
         };
 
-        if (Flags.enableDesktopWindowingMode()
+        if (DESKTOP_WINDOWING_MODE.isEnabled(mContext)
                 && !(Flags.enableDesktopWindowingWallpaperActivity()
                 && Flags.enableDesktopWindowingQuickSwitch())) {
             if (mRecentsView != null && (mRecentsView.getCurrentPageTaskView() != null
@@ -2293,7 +2294,7 @@ public abstract class AbsSwipeUpHandler<T extends RecentsViewContainer,
                     mRecentsAnimationController, mRecentsAnimationTargets);
         });
 
-        if (Flags.enableDesktopWindowingMode()
+        if (DESKTOP_WINDOWING_MODE.isEnabled(mContext)
                 && !(Flags.enableDesktopWindowingWallpaperActivity()
                         && Flags.enableDesktopWindowingQuickSwitch())) {
             if (mRecentsView.getNextPageTaskView() instanceof DesktopTaskView
