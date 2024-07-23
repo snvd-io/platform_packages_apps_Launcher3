@@ -250,7 +250,7 @@ public class BubbleBarViewController {
         return mBubbleBarTranslationY;
     }
 
-    float getBubbleBarCollapsedHeight() {
+    public float getBubbleBarCollapsedHeight() {
         return mBarView.getBubbleBarCollapsedHeight();
     }
 
