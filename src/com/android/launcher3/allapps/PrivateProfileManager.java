@@ -403,6 +403,7 @@ public class PrivateProfileManager extends UserProfileManager {
                     mLockText.setHorizontallyScrolling(false);
                     mPrivateSpaceSettingsButton.setVisibility(
                             isPrivateSpaceSettingsAvailable() ? VISIBLE : GONE);
+                    mPrivateSpaceSettingsButton.setClickable(isPrivateSpaceSettingsAvailable());
                 }
                 lockPill.setVisibility(VISIBLE);
                 lockPill.setOnClickListener(view -> lockingAction(/* lock */ true));
@@ -425,6 +426,7 @@ public class PrivateProfileManager extends UserProfileManager {
                 lockPill.setContentDescription(mLockedStateContentDesc);
 
                 mPrivateSpaceSettingsButton.setVisibility(GONE);
+                mPrivateSpaceSettingsButton.setClickable(false);
                 transitionView.setVisibility(GONE);
             }
             case STATE_TRANSITION -> {
@@ -794,6 +796,14 @@ public class PrivateProfileManager extends UserProfileManager {
             @Override
             public void onAnimationStart(Animator animator) {
                 mPrivateSpaceSettingsButton.setVisibility(VISIBLE);
+                mPrivateSpaceSettingsButton.setClickable(false);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                if (expand) {
+                    mPrivateSpaceSettingsButton.setClickable(true);
+                }
             }
         });
         return settingsAlphaAnim;
