@@ -140,6 +140,7 @@ import com.android.quickstep.RecentsModel;
 import com.android.quickstep.SystemUiProxy;
 import com.android.quickstep.util.DesktopTask;
 import com.android.quickstep.util.GroupTask;
+import com.android.quickstep.views.DesktopTaskView;
 import com.android.quickstep.views.RecentsView;
 import com.android.quickstep.views.TaskView;
 import com.android.systemui.shared.recents.model.Task;
@@ -1357,7 +1358,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                     if (foundTask != null) {
                         TaskView foundTaskView = recents.getTaskViewByTaskId(foundTask.key.id);
                         if (foundTaskView != null
-                                && foundTaskView.isVisibleToUser()) {
+                                && foundTaskView.isVisibleToUser()
+                                && !(foundTaskView instanceof DesktopTaskView)) {
                             TestLogging.recordEvent(
                                     TestProtocol.SEQUENCE_MAIN, "start: taskbarAppIcon");
                             foundTaskView.launchTasks();
@@ -1408,7 +1410,6 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                         return;
                     }
                 }
-
                 startActivity(intent);
             } else {
                 getSystemService(LauncherApps.class).startMainActivity(
