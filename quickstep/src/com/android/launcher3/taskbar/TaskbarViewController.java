@@ -233,6 +233,13 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         mActivity.removeOnDeviceProfileChangeListener(mDeviceProfileChangeListener);
     }
 
+    /**
+     * Gets the taskbar {@link View.Visibility visibility}.
+     */
+    public int getTaskbarVisibility() {
+        return mTaskbarView.getVisibility();
+    }
+
     public boolean areIconsVisible() {
         return mTaskbarView.areIconsVisible();
     }
