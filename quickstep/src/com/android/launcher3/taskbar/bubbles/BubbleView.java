@@ -300,18 +300,9 @@ public class BubbleView extends ConstraintLayout {
         }
     }
 
-    void updateBadgeVisibility(boolean show) {
-        if (mBubble instanceof BubbleBarOverflow) {
-            // The overflow bubble does not have a badge, so just bail.
-            return;
-        }
-        BubbleBarBubble bubble = (BubbleBarBubble) mBubble;
-        Bitmap appBadgeBitmap = bubble.getBadge();
-        int translationX = mOnLeft
-                ? -(bubble.getIcon().getWidth() - appBadgeBitmap.getWidth())
-                : 0;
-        mAppIcon.setTranslationX(translationX);
-        mAppIcon.setVisibility(show ? VISIBLE : GONE);
+    void setBadgeScale(float fraction) {
+        mAppIcon.setScaleX(fraction);
+        mAppIcon.setScaleY(fraction);
     }
 
     boolean hasUnseenContent() {
