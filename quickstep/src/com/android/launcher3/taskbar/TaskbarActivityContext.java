@@ -1134,6 +1134,9 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
      * window.
      */
     public void setTaskbarWindowFocusable(boolean focusable) {
+        if (isPhoneMode()) {
+            return;
+        }
         if (focusable) {
             mWindowLayoutParams.flags &= ~FLAG_NOT_FOCUSABLE;
         } else {
@@ -1146,7 +1149,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
      * Applies forcibly show flag to taskbar window iff transient taskbar is unstashed.
      */
     public void applyForciblyShownFlagWhileTransientTaskbarUnstashed(boolean shouldForceShow) {
-        if (!DisplayController.isTransientTaskbar(this)) {
+        if (!DisplayController.isTransientTaskbar(this) || isPhoneMode()) {
             return;
         }
         if (shouldForceShow) {
@@ -1689,7 +1692,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
      * @param exclude {@code true} then the magnification region computation will omit the window.
      */
     public void excludeFromMagnificationRegion(boolean exclude) {
-        if (mIsExcludeFromMagnificationRegion == exclude) {
+        if (mIsExcludeFromMagnificationRegion == exclude || isPhoneMode()) {
             return;
         }
 
