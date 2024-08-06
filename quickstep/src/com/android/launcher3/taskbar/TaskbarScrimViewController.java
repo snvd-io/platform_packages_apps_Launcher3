@@ -86,6 +86,10 @@ public class TaskbarScrimViewController implements TaskbarControllers.LoggableTa
      * Updates the scrim state based on the flags.
      */
     public void updateStateForSysuiFlags(@SystemUiStateFlags long stateFlags, boolean skipAnim) {
+        if (mActivity.isPhoneMode()) {
+            // There is no scrim for the bar in the phone mode.
+            return;
+        }
         if (isBubbleBarEnabled() && DisplayController.isTransientTaskbar(mActivity)) {
             // These scrims aren't used if bubble bar & transient taskbar are active.
             return;
