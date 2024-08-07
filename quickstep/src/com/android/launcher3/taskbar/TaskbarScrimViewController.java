@@ -28,6 +28,7 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
 import com.android.launcher3.anim.AnimatedFloat;
+import com.android.launcher3.taskbar.bubbles.BubbleControllers;
 import com.android.launcher3.util.DisplayController;
 import com.android.quickstep.SystemUiProxy;
 import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
@@ -97,10 +98,20 @@ public class TaskbarScrimViewController implements TaskbarControllers.LoggableTa
     private boolean shouldShowScrim() {
         final boolean bubblesExpanded = (mSysUiStateFlags & SYSUI_STATE_BUBBLES_EXPANDED) != 0;
         boolean isShadeVisible = (mSysUiStateFlags & SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE) != 0;
+        BubbleControllers bubbleControllers = mActivity.getBubbleControllers();
+        boolean isBubbleControllersPresented = bubbleControllers != null;
+        // when the taskbar is in persistent mode, we hide the task bar icons on bubble bar expand,
+        // which makes the taskbar invisible, so need to check if the bubble bar is not on home
+        // to show the scrim view
+        boolean showScrimForBubbles = bubblesExpanded
+                && !mTaskbarVisible
+                && isBubbleControllersPresented
+                && !DisplayController.isTransientTaskbar(mActivity)
+                && !bubbleControllers.bubbleStashController.isBubblesShowingOnHome();
         return bubblesExpanded && !mControllers.navbarButtonsViewController.isImeVisible()
                 && !isShadeVisible
                 && !mControllers.taskbarStashController.isStashed()
-                && mTaskbarVisible;
+                && (mTaskbarVisible || showScrimForBubbles);
     }
 
     private float getScrimAlpha() {
