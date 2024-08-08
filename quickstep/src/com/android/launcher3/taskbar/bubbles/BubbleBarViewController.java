@@ -140,8 +140,8 @@ public class BubbleBarViewController {
             }
 
             @Override
-            public void onBubbleBarTouchedWhileAnimating() {
-                BubbleBarViewController.this.onBubbleBarTouchedWhileAnimating();
+            public void onBubbleBarTouched() {
+                BubbleBarViewController.this.onBubbleBarTouched();
             }
 
             @Override
@@ -202,9 +202,12 @@ public class BubbleBarViewController {
         }
     }
 
-    private void onBubbleBarTouchedWhileAnimating() {
-        mBubbleBarViewAnimator.onBubbleBarTouchedWhileAnimating();
-        mBubbleStashController.onNewBubbleAnimationInterrupted(false, mBarView.getTranslationY());
+    private void onBubbleBarTouched() {
+        if (isAnimatingNewBubble()) {
+            mBubbleBarViewAnimator.onBubbleBarTouchedWhileAnimating();
+            mBubbleStashController.onNewBubbleAnimationInterrupted(false,
+                    mBarView.getTranslationY());
+        }
     }
 
     private void expandBubbleBar() {
@@ -303,8 +306,11 @@ public class BubbleBarViewController {
 
     /** Whether a new bubble is animating. */
     public boolean isAnimatingNewBubble() {
-        return mBarView.isAnimatingNewBubble()
-                || (mBubbleBarViewAnimator != null && mBubbleBarViewAnimator.hasAnimatingBubble());
+        return mBubbleBarViewAnimator != null && mBubbleBarViewAnimator.isAnimating();
+    }
+
+    public boolean isNewBubbleAnimationRunningOrPending() {
+        return mBubbleBarViewAnimator != null && mBubbleBarViewAnimator.hasAnimation();
     }
 
     /** The horizontal margin of the bubble bar from the edge of the screen. */
@@ -627,7 +633,7 @@ public class BubbleBarViewController {
      * from SystemUI.
      */
     public void setExpandedFromSysui(boolean isExpanded) {
-        if (isAnimatingNewBubble() && isExpanded) {
+        if (isNewBubbleAnimationRunningOrPending() && isExpanded) {
             mBubbleBarViewAnimator.expandedWhileAnimating();
             return;
         }
