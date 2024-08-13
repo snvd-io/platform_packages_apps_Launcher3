@@ -38,7 +38,7 @@
     <string name="hotseat_edu_accept" msgid="1611544083278999837">"Атрымліваць прапановы праграм"</string>
     <string name="hotseat_edu_dismiss" msgid="2781161822780201689">"Не, дзякуй"</string>
     <string name="hotseat_prediction_settings" msgid="6246554993566070818">"Налады"</string>
-    <string name="hotseat_auto_enrolled" msgid="522100018967146807">"Тут з\'яўляюцца праграмы, якімі вы карыстаецеся найбольш часта. Гэты спіс змяняецца на падставе вашых дзеянняў"</string>
+    <string name="hotseat_auto_enrolled" msgid="522100018967146807">"Тут з’яўляюцца праграмы, якімі вы карыстаецеся найбольш часта. Гэты спіс змяняецца на падставе вашых дзеянняў"</string>
     <string name="hotseat_tip_no_empty_slots" msgid="1325212677738179185">"Перацягніце праграмы з ніжняга радка, каб атрымліваць прапановы праграм"</string>
     <string name="hotseat_tip_gaps_filled" msgid="3035673010274223538">"Прапановы праграм дададзены на свабоднае месца"</string>
     <string name="hotsaet_tip_prediction_enabled" msgid="2233554377501347650">"Прапановы праграм уключаны"</string>
@@ -138,6 +138,6 @@
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Перамясціць уніз/управа"</string>
     <string name="quick_switch_overflow" msgid="6935266023013283353">"{count,plural, =1{Паказаць ячшэ # праграму.}one{Паказаць ячшэ # праграму.}few{Паказаць ячшэ # праграмы.}many{Паказаць ячшэ # праграм.}other{Паказаць ячшэ # праграмы.}}"</string>
     <string name="quick_switch_split_task" msgid="5598194724255333896">"<xliff:g id="APP_NAME_1">%1$s</xliff:g> і <xliff:g id="APP_NAME_2">%2$s</xliff:g>"</string>
-    <string name="desktop_select_app_toast" msgid="2306057322833956910">"Дадаванне праграмы на камп\'ютар"</string>
+    <string name="desktop_select_app_toast" msgid="2306057322833956910">"Дадаванне праграмы на камп’ютар"</string>
     <string name="desktop_button_close_app_toast" msgid="5283096349579408560">"Скасаваць"</string>
 </resources>

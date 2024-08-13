@@ -71,7 +71,7 @@
     <string name="home_gesture_tutorial_success" msgid="1736295017642244751">"У вас получилось!"</string>
     <string name="overview_gesture_feedback_swipe_too_far_from_edge" msgid="6402349235265407385">"Проведите снизу вверх от самого края экрана."</string>
     <string name="overview_gesture_feedback_home_detected" msgid="663432226180397138">"Прежде чем отпустить палец, задержите его на экране немного дольше."</string>
-    <string name="overview_gesture_feedback_wrong_swipe_direction" msgid="1191055451018584958">"Проведите по экрану ровно вверх и задержите палец в конце."</string>
+    <string name="overview_gesture_feedback_wrong_swipe_direction" msgid="1191055451018584958">"Проведите по экрану вверх и задержите палец."</string>
     <string name="overview_gesture_feedback_complete_with_follow_up" msgid="3544611727467765026">"Теперь вы знаете, как использовать жесты. Чтобы отключить их, перейдите в настройки."</string>
     <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"Вы выполнили жест для переключения между приложениями."</string>
     <string name="overview_gesture_intro_title" msgid="2902054412868489378">"Переключение между приложениями"</string>

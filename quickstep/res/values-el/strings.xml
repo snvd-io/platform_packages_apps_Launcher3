@@ -66,7 +66,7 @@
     <string name="home_gesture_intro_title" msgid="836590312858441830">"Σύρετε για μετάβαση στην αρχική οθόνη"</string>
     <string name="home_gesture_intro_subtitle" msgid="2632238748497975326">"Σύρετε προς τα πάνω από το κάτω μέρος της οθόνης. Αυτή η κίνηση σάς μεταφέρει πάντα στην αρχ. οθόνη."</string>
     <string name="home_gesture_spoken_intro_subtitle" msgid="1030987707382031750">"Σύρετε από το κάτω άκρο προς τα πάνω με 2 δάχτ. Αυτή η κίνηση σάς μεταφέρει πάντα στην αρχική οθόνη."</string>
-    <string name="home_gesture_tutorial_title" msgid="3126834347496917376">"Αρχική"</string>
+    <string name="home_gesture_tutorial_title" msgid="3126834347496917376">"Μετάβαση στην αρχική οθόνη"</string>
     <string name="home_gesture_tutorial_subtitle" msgid="7245995490408668778">"Σύρετε προς τα επάνω από το κάτω μέρος της οθόνης"</string>
     <string name="home_gesture_tutorial_success" msgid="1736295017642244751">"Μπράβο!"</string>
     <string name="overview_gesture_feedback_swipe_too_far_from_edge" msgid="6402349235265407385">"Φροντίστε να σύρετε προς τα επάνω από το κάτω άκρο της οθόνης"</string>
