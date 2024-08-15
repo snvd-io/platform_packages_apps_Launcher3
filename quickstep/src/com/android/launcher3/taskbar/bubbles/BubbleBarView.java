@@ -758,7 +758,8 @@ public class BubbleBarView extends FrameLayout {
     }
 
     /** Add a new bubble and remove an old bubble from the bubble bar. */
-    public void addBubbleAndRemoveBubble(BubbleView addedBubble, BubbleView removedBubble) {
+    public void addBubbleAndRemoveBubble(BubbleView addedBubble, BubbleView removedBubble,
+            Runnable onEndRunnable) {
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams((int) mIconSize, (int) mIconSize,
                 Gravity.LEFT);
         boolean isOverflowSelected = mSelectedBubbleView.isOverflow();
@@ -792,6 +793,9 @@ public class BubbleBarView extends FrameLayout {
                 removeView(removedBubble);
                 updateWidth();
                 mBubbleAnimator = null;
+                if (onEndRunnable != null) {
+                    onEndRunnable.run();
+                }
             }
 
             @Override

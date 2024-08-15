@@ -286,9 +286,10 @@ public class BubbleBarController extends IBubblesListener.Stub {
             RemovedBubble removedBubble = update.removedBubbles.get(0);
             BubbleBarBubble bubbleToRemove = mBubbles.remove(removedBubble.getKey());
             mBubbles.put(update.addedBubble.getKey(), update.addedBubble);
+            boolean showOverflow = update.showOverflowChanged && update.showOverflow;
             if (bubbleToRemove != null) {
                 mBubbleBarViewController.addBubbleAndRemoveBubble(update.addedBubble,
-                        bubbleToRemove, isExpanding, suppressAnimation);
+                        bubbleToRemove, isExpanding, suppressAnimation, showOverflow);
             } else {
                 mBubbleBarViewController.addBubble(update.addedBubble, isExpanding,
                         suppressAnimation);
