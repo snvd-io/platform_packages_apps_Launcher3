@@ -168,10 +168,6 @@ public class BubbleBarController extends IBubblesListener.Stub {
         mBarView = bubbleView; // Need the view for inflating bubble views.
 
         mSystemUiProxy = SystemUiProxy.INSTANCE.get(context);
-
-        if (sBubbleBarEnabled) {
-            mSystemUiProxy.setBubblesListener(this);
-        }
     }
 
     public void onDestroy() {
@@ -197,6 +193,10 @@ public class BubbleBarController extends IBubblesListener.Stub {
             mBubbleBarViewController.setUpdateSelectedBubbleAfterCollapse(
                     key -> setSelectedBubbleInternal(mBubbles.get(key)));
             mBubbleBarViewController.setBoundsChangeListener(this::onBubbleBarBoundsChanged);
+
+            if (sBubbleBarEnabled) {
+                mSystemUiProxy.setBubblesListener(this);
+            }
         });
     }
 
