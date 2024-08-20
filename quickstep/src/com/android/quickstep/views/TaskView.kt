@@ -290,9 +290,6 @@ constructor(
         set(value) {
             field = value
             applyScale()
-            if (enableRefactorTaskThumbnail()) {
-                taskViewModel.updateNonGridScale(value)
-            }
         }
 
     private var dismissScale = 1f
