@@ -7,6 +7,7 @@ import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,6 +23,7 @@ import com.android.quickstep.util.GroupTask;
 import com.android.quickstep.util.LayoutUtils;
 import com.android.quickstep.util.TISBindHelper;
 import com.android.quickstep.views.RecentsView;
+import com.android.quickstep.views.RecentsViewContainer;
 
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
@@ -79,39 +81,39 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
                 return response;
             }
 
-            case TestProtocol.REQUEST_GET_FOCUSED_TASK_HEIGHT_FOR_TABLET: {
+            case TestProtocol.REQUEST_GET_OVERVIEW_TASK_SIZE: {
+                Log.d(OVERVIEW_FOCUS_TASK_HEIGHT_MISMATCH, "== REQUEST_GET_OVERVIEW_TASK_SIZE ==");
+                Rect gridSize = new Rect();
+                LauncherActivityInterface.INSTANCE.calculateGridSize(mDeviceProfile, mContext,
+                        gridSize);
+                Log.d(OVERVIEW_FOCUS_TASK_HEIGHT_MISMATCH, "gridSize: " + gridSize);
+                PointF taskDimension = new PointF();
+                LauncherActivityInterface.getTaskDimension(mContext, mDeviceProfile, taskDimension);
                 Log.d(OVERVIEW_FOCUS_TASK_HEIGHT_MISMATCH,
-                        "=== REQUEST_GET_FOCUSED_TASK_HEIGHT_FOR_TABLET ===");
-                Log.d(OVERVIEW_FOCUS_TASK_HEIGHT_MISMATCH, "isTablet: " + mDeviceProfile.isTablet);
-                if (!mDeviceProfile.isTablet) {
-                    return null;
-                }
-                Rect focusedTaskRect = new Rect();
-                Log.d(OVERVIEW_FOCUS_TASK_HEIGHT_MISMATCH, "widthPx: " + mDeviceProfile.widthPx);
-                Log.d(OVERVIEW_FOCUS_TASK_HEIGHT_MISMATCH, "heightPx: " + mDeviceProfile.heightPx);
-                Log.d(OVERVIEW_FOCUS_TASK_HEIGHT_MISMATCH, "insets: " + mDeviceProfile.getInsets());
-                Log.d(OVERVIEW_FOCUS_TASK_HEIGHT_MISMATCH, "overviewTaskThumbnailTopMarginPx: "
-                        + mDeviceProfile.overviewTaskThumbnailTopMarginPx);
-                Log.d(OVERVIEW_FOCUS_TASK_HEIGHT_MISMATCH, "overviewActionsClaimedSpace: "
-                        + mDeviceProfile.getOverviewActionsClaimedSpace());
-                Log.d(OVERVIEW_FOCUS_TASK_HEIGHT_MISMATCH,
-                        "overviewGridSideMargin: " + mDeviceProfile.overviewGridSideMargin);
+                        "taskbarHeight: " + mDeviceProfile.taskbarHeight);
+                Log.d(OVERVIEW_FOCUS_TASK_HEIGHT_MISMATCH, "taskDimension: " + taskDimension);
+                Rect taskSize = new Rect();
                 LauncherActivityInterface.INSTANCE.calculateTaskSize(mContext, mDeviceProfile,
-                        focusedTaskRect, RecentsPagedOrientationHandler.PORTRAIT);
-                Log.d(OVERVIEW_FOCUS_TASK_HEIGHT_MISMATCH, "focusedTaskRect: " + focusedTaskRect);
-                response.putInt(TestProtocol.TEST_INFO_RESPONSE_FIELD, focusedTaskRect.height());
-                return response;
+                        taskSize, RecentsPagedOrientationHandler.PORTRAIT);
+                Log.d(OVERVIEW_FOCUS_TASK_HEIGHT_MISMATCH, "calculateTaskSize: " + taskSize);
+                return getUIProperty(Bundle::putParcelable,
+                        recentsViewContainer -> {
+                            Rect lastComputedTaskSize =
+                                    recentsViewContainer.<RecentsView<?, ?>>getOverviewPanel()
+                                            .getLastComputedTaskSize();
+                            Log.d(OVERVIEW_FOCUS_TASK_HEIGHT_MISMATCH,
+                                    "lastComputedTaskSize: " + lastComputedTaskSize);
+                            return lastComputedTaskSize;
+                        },
+                        this::getRecentsViewContainer);
             }
 
-            case TestProtocol.REQUEST_GET_GRID_TASK_SIZE_RECT_FOR_TABLET: {
-                if (!mDeviceProfile.isTablet) {
-                    return null;
-                }
-                Rect gridTaskRect = new Rect();
-                LauncherActivityInterface.INSTANCE.calculateGridTaskSize(mContext, mDeviceProfile,
-                        gridTaskRect, RecentsPagedOrientationHandler.PORTRAIT);
-                response.putParcelable(TestProtocol.TEST_INFO_RESPONSE_FIELD, gridTaskRect);
-                return response;
+            case TestProtocol.REQUEST_GET_OVERVIEW_GRID_TASK_SIZE: {
+                return getUIProperty(Bundle::putParcelable,
+                        recentsViewContainer ->
+                                recentsViewContainer.<RecentsView<?, ?>>getOverviewPanel()
+                                        .getLastComputedGridTaskSize(),
+                        this::getRecentsViewContainer);
             }
 
             case TestProtocol.REQUEST_GET_OVERVIEW_PAGE_SPACING: {
@@ -230,6 +232,17 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
         OverviewComponentObserver observer = new OverviewComponentObserver(mContext, rads);
         try {
             return observer.getActivityInterface().getCreatedContainer();
+        } finally {
+            observer.onDestroy();
+            rads.destroy();
+        }
+    }
+
+    private RecentsViewContainer getRecentsViewContainer() {
+        RecentsAnimationDeviceState rads = new RecentsAnimationDeviceState(mContext);
+        OverviewComponentObserver observer = new OverviewComponentObserver(mContext, rads);
+        try {
+            return observer.getContainerInterface().getCreatedContainer();
         } finally {
             observer.onDestroy();
             rads.destroy();
