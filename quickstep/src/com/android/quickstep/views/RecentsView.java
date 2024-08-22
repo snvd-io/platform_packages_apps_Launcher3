@@ -3035,6 +3035,10 @@ public abstract class RecentsView<
         TaskView runningTaskView = getRunningTaskView();
         if (runningTaskView != null) {
             runningTaskView.setShouldShowScreenshot(mRunningTaskShowScreenshot);
+            if (!enableRefactorTaskThumbnail()) {
+                runningTaskView.getTaskContainers().forEach(
+                        taskContainer -> taskContainer.getThumbnailViewDeprecated().refresh());
+            }
         }
         if (enableRefactorTaskThumbnail()) {
             mRecentsViewModel.setRunningTaskShowScreenshot(showScreenshot);
