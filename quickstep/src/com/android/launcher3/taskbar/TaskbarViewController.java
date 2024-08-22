@@ -1005,7 +1005,6 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
                 "ALPHA_INDEX_RECENTS_DISABLED",
                 "ALPHA_INDEX_NOTIFICATION_EXPANDED",
                 "ALPHA_INDEX_ASSISTANT_INVOKED",
-                "ALPHA_INDEX_IME_BUTTON_NAV",
                 "ALPHA_INDEX_SMALL_SCREEN");
 
         mModelCallbacks.dumpLogs(prefix + "\t", pw);
