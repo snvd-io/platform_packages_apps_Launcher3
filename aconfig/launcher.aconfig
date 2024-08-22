@@ -349,3 +349,13 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "ignore_three_finger_trackpad_for_nav_handle_long_press"
+    namespace: "launcher"
+    description: "Ignore three finger trackpad event for nav handle long press"
+    bug: "342143522"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
