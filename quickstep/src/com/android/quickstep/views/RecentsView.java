@@ -2949,8 +2949,8 @@ public abstract class RecentsView<
         setCurrentTask(runningTaskViewId);
 
         boolean shouldFocusRunningTask = !(enableGridOnlyOverview()
-                && (enableLargeDesktopWindowingTile()
-                || getRunningTaskView() instanceof DesktopTaskView));
+                || (enableLargeDesktopWindowingTile()
+                && getRunningTaskView() instanceof DesktopTaskView));
         setFocusedTaskViewId(shouldFocusRunningTask ? runningTaskViewId : INVALID_TASK_ID);
         runOnPageScrollsInitialized(() -> setCurrentPage(getRunningTaskIndex()));
         setRunningTaskViewShowScreenshot(false);
