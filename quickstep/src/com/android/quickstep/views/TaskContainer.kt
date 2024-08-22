@@ -171,4 +171,18 @@ class TaskContainer(
             thumbnailViewDeprecated.setOverlayEnabled(enabled)
         }
     }
+
+    fun addChildForAccessibility(outChildren: ArrayList<View>) {
+        addAccessibleChildToList(iconView.asView(), outChildren)
+        addAccessibleChildToList(snapshotView, outChildren)
+        showWindowsView?.let { addAccessibleChildToList(it, outChildren) }
+    }
+
+    private fun addAccessibleChildToList(view: View, outChildren: ArrayList<View>) {
+        if (view.includeForAccessibility()) {
+            outChildren.add(view)
+        } else {
+            view.addChildrenForAccessibility(outChildren)
+        }
+    }
 }

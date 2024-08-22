@@ -85,7 +85,7 @@ class DigitalWellBeingToast(
 
     private fun setNoLimit() {
         hasLimit = false
-        taskView.contentDescription = task.titleDescription
+        setContentDescription(appUsageLimitTimeMs = -1, appRemainingTimeMs = -1)
         replaceBanner(null)
         appRemainingTimeMs = -1
     }
@@ -110,9 +110,14 @@ class DigitalWellBeingToast(
                     setOnClickListener(::openAppUsageSettings)
                 }
         replaceBanner(toast)
+        setContentDescription(appUsageLimitTimeMs, appRemainingTimeMs)
+    }
 
-        taskView.contentDescription =
+    private fun setContentDescription(appUsageLimitTimeMs: Long, appRemainingTimeMs: Long) {
+        val taskContainer: TaskContainer = taskView.getTaskContainerById(task.key.id) ?: return
+        val contentDescription =
             getContentDescriptionForTask(task, appUsageLimitTimeMs, appRemainingTimeMs)
+        taskContainer.snapshotView.contentDescription = contentDescription
     }
 
     fun initialize(task: Task) {

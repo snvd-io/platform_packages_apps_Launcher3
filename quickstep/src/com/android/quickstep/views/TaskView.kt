@@ -1662,6 +1662,12 @@ constructor(
         return thumbnailBounds.contains(x.toInt(), y.toInt())
     }
 
+    override fun addChildrenForAccessibility(outChildren: ArrayList<View>) {
+        (if (isLayoutRtl) taskContainers.reversed() else taskContainers).forEach {
+            it.addChildForAccessibility(outChildren)
+        }
+    }
+
     companion object {
         private const val TAG = "TaskView"
         const val FLAG_UPDATE_ICON = 1
