@@ -674,8 +674,9 @@ public class TouchInteractionService extends Service {
     private void initInputMonitor(String reason) {
         disposeEventHandlers("Initializing input monitor due to: " + reason);
 
-        if (mDeviceState.isButtonNavMode() && (!ENABLE_TRACKPAD_GESTURE.get()
-                || mTrackpadsConnected.isEmpty())) {
+        if (mDeviceState.isButtonNavMode()
+                && !mDeviceState.supportsAssistantGestureInButtonNav()
+                && (!ENABLE_TRACKPAD_GESTURE.get() || mTrackpadsConnected.isEmpty())) {
             return;
         }
 
@@ -857,7 +858,9 @@ public class TouchInteractionService extends Service {
                             .append("); cancelling gesture."),
                     NAVIGATION_MODE_SWITCHED);
             event.setAction(ACTION_CANCEL);
-        } else if (mDeviceState.isButtonNavMode() && !isTrackpadMotionEvent(event)) {
+        } else if (mDeviceState.isButtonNavMode()
+                && !mDeviceState.supportsAssistantGestureInButtonNav()
+                && !isTrackpadMotionEvent(event)) {
             ActiveGestureLog.INSTANCE.addLog(new CompoundString("TIS.onInputEvent: ")
                     .append("Cannot process input event: ")
                     .append("using 3-button nav and event is not a trackpad event"));
@@ -909,7 +912,22 @@ public class TouchInteractionService extends Service {
             if (isInSwipeUpTouchRegion && tac != null) {
                 tac.closeKeyboardQuickSwitchView();
             }
-            if ((!isOneHandedModeActive && isInSwipeUpTouchRegion)
+            if (mDeviceState.isButtonNavMode()
+                    && mDeviceState.supportsAssistantGestureInButtonNav()) {
+                reasonString.append("in three button mode which supports Assistant gesture");
+                // Consume gesture event for Assistant (all other gestures should do nothing).
+                if (mDeviceState.canTriggerAssistantAction(event)) {
+                    reasonString.append(" and event can trigger assistant action")
+                            .append(", consuming gesture for assistant action");
+                    mGestureState =
+                            createGestureState(mGestureState, getTrackpadGestureType(event));
+                    mUncheckedConsumer = tryCreateAssistantInputConsumer(mGestureState, event);
+                } else {
+                    reasonString.append(" but event cannot trigger Assistant")
+                            .append(", consuming gesture as no-op");
+                    mUncheckedConsumer = InputConsumer.NO_OP;
+                }
+            } else if ((!isOneHandedModeActive && isInSwipeUpTouchRegion)
                     || isHoverActionWithoutConsumer || isOnBubbles) {
                 reasonString.append(!isOneHandedModeActive && isInSwipeUpTouchRegion
                                 ? "one handed mode is not active and event is in swipe up region"
@@ -931,8 +949,7 @@ public class TouchInteractionService extends Service {
                                 : "event is a trackpad multi-finger swipe")
                         .append(" and event can trigger assistant action")
                         .append(", consuming gesture for assistant action");
-                mGestureState = createGestureState(mGestureState,
-                        getTrackpadGestureType(event));
+                mGestureState = createGestureState(mGestureState, getTrackpadGestureType(event));
                 // Do not change mConsumer as if there is an ongoing QuickSwitch gesture, we
                 // should not interrupt it. QuickSwitch assumes that interruption can only
                 // happen if the next gesture is also quick switch.
