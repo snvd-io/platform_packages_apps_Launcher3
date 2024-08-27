@@ -146,6 +146,7 @@ class TaskContainer(
             }
 
     fun bind() {
+        digitalWellBeingToast?.bind(task, taskView, snapshotView, stagePosition)
         if (enableRefactorTaskThumbnail()) {
             bindThumbnailView()
         } else {
