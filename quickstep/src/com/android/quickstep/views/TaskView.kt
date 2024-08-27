@@ -65,6 +65,7 @@ import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.MultiPropertyFactory
 import com.android.launcher3.util.MultiPropertyFactory.MULTI_PROPERTY_VALUE
+import com.android.launcher3.util.MultiValueAlpha
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.util.SplitConfigurationOptions
@@ -391,11 +392,19 @@ constructor(
             applyTranslationX()
         }
 
-    protected var stableAlpha = 1f
+    private val taskViewAlpha = MultiValueAlpha(this, NUM_ALPHA_CHANNELS)
+
+    protected var stableAlpha
         set(value) {
-            field = value
-            alpha = stableAlpha
+            taskViewAlpha.get(ALPHA_INDEX_STABLE).value = value
         }
+        get() = taskViewAlpha.get(ALPHA_INDEX_STABLE).value
+
+    protected var attachAlpha
+        set(value) {
+            taskViewAlpha.get(ALPHA_INDEX_ATTACH).value = value
+        }
+        get() = taskViewAlpha.get(ALPHA_INDEX_ATTACH).value
 
     protected var shouldShowScreenshot = false
         get() = !isRunningTask || field
@@ -1584,7 +1593,7 @@ constructor(
         }
         dismissScale = 1f
         translationZ = 0f
-        alpha = stableAlpha
+        attachAlpha = 1f
         setIconScaleAndDim(1f)
         setColorTint(0f, 0)
     }
@@ -1660,6 +1669,11 @@ constructor(
         const val FOCUS_TRANSITION_INDEX_FULLSCREEN = 0
         const val FOCUS_TRANSITION_INDEX_SCALE_AND_DIM = 1
         const val FOCUS_TRANSITION_INDEX_COUNT = 2
+
+        private const val ALPHA_INDEX_STABLE = 0
+        private const val ALPHA_INDEX_ATTACH = 1
+
+        private const val NUM_ALPHA_CHANNELS = 2
 
         /** The maximum amount that a task view can be scrimmed, dimmed or tinted. */
         const val MAX_PAGE_SCRIM_ALPHA = 0.4f
