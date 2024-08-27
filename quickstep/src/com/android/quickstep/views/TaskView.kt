@@ -1398,7 +1398,7 @@ constructor(
     private fun onFocusTransitionProgressUpdated(focusTransitionProgress: Float) {
         taskContainers.forEach {
             it.iconView.setContentAlpha(focusTransitionProgress)
-            it.digitalWellBeingToast?.updateBannerOffset(1f - focusTransitionProgress)
+            it.digitalWellBeingToast?.bannerOffsetPercentage = 1f - focusTransitionProgress
         }
     }
 
@@ -1548,7 +1548,7 @@ constructor(
     private fun onModalnessUpdated(modalness: Float) {
         taskContainers.forEach {
             it.iconView.setModalAlpha(1 - modalness)
-            it.digitalWellBeingToast?.updateBannerOffset(modalness)
+            it.digitalWellBeingToast?.bannerOffsetPercentage = modalness
         }
     }
 
