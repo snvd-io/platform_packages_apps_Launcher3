@@ -73,48 +73,6 @@ class OverviewCommandHelper(
     private val visibleRecentsView: RecentsView<*, *>?
         get() = activityInterface.getVisibleRecentsView<RecentsView<*, *>>()
 
-    /** Called when the command finishes execution. */
-    private fun onCommandFinished(command: CommandInfo) {
-        command.status = CommandStatus.COMPLETED
-        if (commandQueue.first() !== command) {
-            Log.d(
-                TAG,
-                "next task not scheduled. First pending command type " +
-                    "is ${commandQueue.first()} - command type is: $command"
-            )
-            return
-        }
-
-        Log.d(TAG, "command executed successfully! $command")
-        commandQueue.remove(command)
-        executeNext()
-    }
-
-    /**
-     * Executes the next command from the queue. If the command finishes immediately (returns true),
-     * it continues to execute the next command, until the queue is empty of a command defer's its
-     * completion (returns false).
-     */
-    @UiThread
-    private fun executeNext() {
-        val command: CommandInfo =
-            commandQueue.firstOrNull()
-                ?: run {
-                    Log.d(TAG, "no pending commands to be executed.")
-                    return
-                }
-
-        Log.d(TAG, "executing command: $command")
-        val result = executeCommand(command)
-
-        Log.d(TAG, "command executed: $command with result: $result")
-        if (result) {
-            onCommandFinished(command)
-        } else {
-            Log.d(TAG, "waiting for command callback: $command")
-        }
-    }
-
     /**
      * Adds a command to be executed next, after all pending tasks are completed. Max commands that
      * can be queued is [.MAX_QUEUE_SIZE]. Requests after reaching that limit will be silently
@@ -138,22 +96,88 @@ class OverviewCommandHelper(
 
     fun canStartHomeSafely(): Boolean = commandQueue.isEmpty() || commandQueue.first().type == HOME
 
-    /** Clear commands from the queue */
+    /** Clear pending commands from the queue */
     fun clearPendingCommands() {
         Log.d(TAG, "clearing pending commands: $commandQueue")
         commandQueue.clear()
     }
 
-    private fun getNextTask(view: RecentsView<*, *>): TaskView? {
-        val runningTaskView = view.runningTaskView
+    /**
+     * Executes the next command from the queue. If the command finishes immediately (returns true),
+     * it continues to execute the next command, until the queue is empty of a command defer's its
+     * completion (returns false).
+     */
+    @UiThread
+    private fun executeNext() {
+        val command: CommandInfo =
+            commandQueue.firstOrNull()
+                ?: run {
+                    Log.d(TAG, "no pending commands to be executed.")
+                    return
+                }
 
-        return if (runningTaskView == null) {
-            view.getTaskViewAt(0)
+        command.status = CommandStatus.PROCESSING
+        Log.d(TAG, "executing command: $command")
+
+        val result = executeCommand(command)
+        Log.d(TAG, "command executed: $command with result: $result")
+        if (result) {
+            onCommandFinished(command)
         } else {
-            val nextTask = view.nextTaskView
-            nextTask ?: runningTaskView
+            Log.d(TAG, "waiting for command callback: $command")
         }
     }
+
+    /**
+     * Executes the task and returns true if next task can be executed. If false, then the next task
+     * is deferred until [.scheduleNextTask] is called
+     */
+    private fun executeCommand(command: CommandInfo): Boolean {
+        if (waitForToggleCommandComplete && command.type == TOGGLE) {
+            Log.d(TAG, "executeCommand: $command - waiting for toggle command complete")
+            return true
+        }
+
+        val recentsView = visibleRecentsView
+        Log.d(TAG, "executeCommand: $command - visibleRecentsView: $recentsView")
+        return if (recentsView != null) {
+            executeWhenRecentsIsVisible(command, recentsView)
+        } else {
+            executeWhenRecentsIsNotVisible(command)
+        }
+    }
+
+    private fun executeWhenRecentsIsVisible(
+        command: CommandInfo,
+        recentsView: RecentsView<*, *>,
+    ): Boolean =
+        when (command.type) {
+            SHOW -> true // already visible
+            KEYBOARD_INPUT,
+            HIDE -> {
+                if (recentsView.isHandlingTouch) {
+                    true
+                } else {
+                    keyboardTaskFocusIndex = PagedView.INVALID_PAGE
+                    val currentPage = recentsView.nextPage
+                    val taskView = recentsView.getTaskViewAt(currentPage)
+                    launchTask(recentsView, taskView, command)
+                }
+            }
+            TOGGLE -> {
+                val taskView =
+                    if (recentsView.runningTaskView == null) {
+                        recentsView.getTaskViewAt(0)
+                    } else {
+                        recentsView.nextTaskView ?: recentsView.runningTaskView
+                    }
+                launchTask(recentsView, taskView, command)
+            }
+            HOME -> {
+                recentsView.startHome()
+                true
+            }
+        }
 
     private fun launchTask(
         recents: RecentsView<*, *>,
@@ -182,81 +206,46 @@ class OverviewCommandHelper(
         }
     }
 
-    /**
-     * Executes the task and returns true if next task can be executed. If false, then the next task
-     * is deferred until [.scheduleNextTask] is called
-     */
-    private fun executeCommand(command: CommandInfo): Boolean {
-        command.status = CommandStatus.PROCESSING
+    private fun executeWhenRecentsIsNotVisible(command: CommandInfo): Boolean {
+        val recentsViewContainer = activityInterface.getCreatedContainer() as? RecentsViewContainer
+        val recentsView: RecentsView<*, *>? = recentsViewContainer?.getOverviewPanel()
+        val deviceProfile = recentsViewContainer?.getDeviceProfile()
+        val uiController = activityInterface.getTaskbarController()
+        val allowQuickSwitch =
+            FeatureFlags.ENABLE_KEYBOARD_QUICK_SWITCH.get() &&
+                uiController != null &&
+                deviceProfile != null &&
+                (deviceProfile.isTablet || deviceProfile.isTwoPanels)
 
-        if (waitForToggleCommandComplete && command.type == TOGGLE) {
-            Log.d(TAG, "executeCommand: $command - waiting for toggle command complete")
-            return true
-        }
-
-        var recentsView = visibleRecentsView
-        Log.d(TAG, "executeCommand: $command - visibleRecentsView: $recentsView")
-        if (recentsView == null) {
-            val activity = activityInterface.getCreatedContainer() as? RecentsViewContainer
-            recentsView = activity?.getOverviewPanel()
-            val deviceProfile = activity?.getDeviceProfile()
-            val uiController = activityInterface.getTaskbarController()
-            val allowQuickSwitch =
-                FeatureFlags.ENABLE_KEYBOARD_QUICK_SWITCH.get() &&
-                    uiController != null &&
-                    deviceProfile != null &&
-                    (deviceProfile.isTablet || deviceProfile.isTwoPanels)
-
-            when (command.type) {
-                HIDE -> {
-                    if (!allowQuickSwitch) return true
-                    keyboardTaskFocusIndex = uiController!!.launchFocusedTask()
-                    if (keyboardTaskFocusIndex == -1) return true
-                }
-                KEYBOARD_INPUT ->
-                    if (allowQuickSwitch) {
-                        uiController!!.openQuickSwitchView()
-                        return true
-                    } else {
-                        keyboardTaskFocusIndex = 0
-                    }
-                HOME -> {
-                    ActiveGestureLog.INSTANCE.addLog("OverviewCommandHelper.executeCommand(HOME)")
-                    // Although IActivityTaskManager$Stub$Proxy.startActivity is a slow binder call,
-                    // we should still call it on main thread because launcher is waiting for
-                    // ActivityTaskManager to resume it. Also calling startActivity() on bg thread
-                    // could potentially delay resuming launcher. See b/348668521 for more details.
-                    touchInteractionService.startActivity(overviewComponentObserver.homeIntent)
+        when (command.type) {
+            HIDE -> {
+                if (!allowQuickSwitch) return true
+                keyboardTaskFocusIndex = uiController!!.launchFocusedTask()
+                if (keyboardTaskFocusIndex == -1) return true
+            }
+            KEYBOARD_INPUT ->
+                if (allowQuickSwitch) {
+                    uiController!!.openQuickSwitchView()
                     return true
-                }
-                SHOW ->
-                    // When Recents is not currently visible, the command's type is SHOW
-                    // when overview is triggered via the keyboard overview button or Action+Tab
-                    // keys (Not Alt+Tab which is KQS). The overview button on-screen in 3-button
-                    // nav is TYPE_TOGGLE.
+                } else {
                     keyboardTaskFocusIndex = 0
-                TOGGLE -> {}
-            }
-        } else {
-            return when (command.type) {
-                SHOW -> true // already visible
-                KEYBOARD_INPUT,
-                HIDE -> {
-                    if (recentsView.isHandlingTouch) {
-                        true
-                    } else {
-                        keyboardTaskFocusIndex = PagedView.INVALID_PAGE
-                        val currentPage = recentsView.nextPage
-                        val taskView = recentsView.getTaskViewAt(currentPage)
-                        launchTask(recentsView, taskView, command)
-                    }
                 }
-                TOGGLE -> launchTask(recentsView, getNextTask(recentsView), command)
-                HOME -> {
-                    recentsView.startHome()
-                    true
-                }
+            HOME -> {
+                ActiveGestureLog.INSTANCE.addLog("OverviewCommandHelper.executeCommand(HOME)")
+                // Although IActivityTaskManager$Stub$Proxy.startActivity is a slow binder call,
+                // we should still call it on main thread because launcher is waiting for
+                // ActivityTaskManager to resume it. Also calling startActivity() on bg thread
+                // could potentially delay resuming launcher. See b/348668521 for more details.
+                touchInteractionService.startActivity(overviewComponentObserver.homeIntent)
+                return true
             }
+            SHOW ->
+                // When Recents is not currently visible, the command's type is SHOW
+                // when overview is triggered via the keyboard overview button or Action+Tab
+                // keys (Not Alt+Tab which is KQS). The overview button on-screen in 3-button
+                // nav is TYPE_TOGGLE.
+                keyboardTaskFocusIndex = 0
+            TOGGLE -> {}
         }
 
         recentsView?.setKeyboardTaskFocusIndex(keyboardTaskFocusIndex)
@@ -264,6 +253,7 @@ class OverviewCommandHelper(
         val animatorListener: Animator.AnimatorListener =
             object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator) {
+                    Log.d(TAG, "switching to Overview state - onAnimationStart: $command")
                     super.onAnimationStart(animation)
                     updateRecentsViewFocus(command)
                     logShowOverviewFrom(command.type)
@@ -309,9 +299,11 @@ class OverviewCommandHelper(
                     controller: RecentsAnimationController,
                     targets: RecentsAnimationTargets
                 ) {
+                    Log.d(TAG, "recents animation started: $command")
                     updateRecentsViewFocus(command)
                     logShowOverviewFrom(command.type)
                     activityInterface.runOnInitBackgroundStateUI {
+                        Log.d(TAG, "recents animation started - onInitBackgroundStateUI: $command")
                         interactionHandler.onGestureEnded(0f, PointF())
                     }
                     command.removeListener(this)
@@ -320,6 +312,7 @@ class OverviewCommandHelper(
                 override fun onRecentsAnimationCanceled(
                     thumbnailDatas: HashMap<Int, ThumbnailData>
                 ) {
+                    Log.d(TAG, "recents animation canceled: $command")
                     interactionHandler.onGestureCancelled()
                     command.removeListener(this)
 
@@ -366,6 +359,23 @@ class OverviewCommandHelper(
         onCommandFinished(command)
     }
 
+    /** Called when the command finishes execution. */
+    private fun onCommandFinished(command: CommandInfo) {
+        command.status = CommandStatus.COMPLETED
+        if (commandQueue.first() !== command) {
+            Log.d(
+                TAG,
+                "next task not scheduled. First pending command type " +
+                    "is ${commandQueue.first()} - command type is: $command"
+            )
+            return
+        }
+
+        Log.d(TAG, "command executed successfully! $command")
+        commandQueue.remove(command)
+        executeNext()
+    }
+
     private fun updateRecentsViewFocus(command: CommandInfo) {
         val recentsView: RecentsView<*, *> = visibleRecentsView ?: return
         if (command.type != KEYBOARD_INPUT && command.type != HIDE && command.type != SHOW) {
@@ -380,10 +390,11 @@ class OverviewCommandHelper(
         // here we launch overview with live tile.
         recentsView.viewRootImpl.touchModeChanged(false)
         // Ensure that recents view has focus so that it receives the followup key inputs
-        if (requestFocus(recentsView.getTaskViewAt(keyboardTaskFocusIndex))) return
-        if (requestFocus(recentsView.nextTaskView)) return
-        if (requestFocus(recentsView.getTaskViewAt(0))) return
-        requestFocus(recentsView)
+        // Stops requesting focused after first view gets focused.
+        recentsView.getTaskViewAt(keyboardTaskFocusIndex).requestFocus() ||
+            recentsView.nextTaskView.requestFocus() ||
+            recentsView.getTaskViewAt(0).requestFocus() ||
+            recentsView.requestFocus()
     }
 
     private fun onRecentsViewFocusUpdated(command: CommandInfo) {
@@ -396,11 +407,11 @@ class OverviewCommandHelper(
         keyboardTaskFocusIndex = PagedView.INVALID_PAGE
     }
 
-    private fun requestFocus(taskView: View?): Boolean {
-        if (taskView == null) return false
-        taskView.post {
-            taskView.requestFocus()
-            taskView.requestAccessibilityFocus()
+    private fun View?.requestFocus(): Boolean {
+        if (this == null) return false
+        post {
+            requestFocus()
+            requestAccessibilityFocus()
         }
         return true
     }
