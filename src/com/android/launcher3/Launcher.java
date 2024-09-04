@@ -3036,6 +3036,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         return mPopupDataProvider.getDotInfoForItem(info);
     }
 
+    @NonNull
     public LauncherOverlayManager getOverlayManager() {
         return mOverlayManager;
     }
