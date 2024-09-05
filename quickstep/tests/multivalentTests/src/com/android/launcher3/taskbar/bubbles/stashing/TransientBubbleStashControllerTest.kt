@@ -81,6 +81,8 @@ class TransientBubbleStashControllerTest {
     private lateinit var barScaleX: AnimatedFloat
     private lateinit var barScaleY: AnimatedFloat
     private lateinit var barAlpha: MultiValueAlpha
+    private lateinit var bubbleAlpha: AnimatedFloat
+    private lateinit var backgroundAlpha: AnimatedFloat
     private lateinit var stashedHandleAlpha: MultiValueAlpha
     private lateinit var stashedHandleScale: AnimatedFloat
     private lateinit var stashedHandleTranslationY: AnimatedFloat
@@ -300,12 +302,16 @@ class TransientBubbleStashControllerTest {
         barScaleX = AnimatedFloat { value -> bubbleBarView.scaleX = value }
         barScaleY = AnimatedFloat { value -> bubbleBarView.scaleY = value }
         barAlpha = MultiValueAlpha(bubbleBarView, 1 /* num alpha channels */)
+        bubbleAlpha = AnimatedFloat { value -> bubbleBarView.setBubbleAlpha(value) }
+        backgroundAlpha = AnimatedFloat { value -> bubbleBarView.setBackgroundAlpha(value) }
 
         whenever(bubbleBarViewController.hasBubbles()).thenReturn(true)
         whenever(bubbleBarViewController.bubbleBarTranslationY).thenReturn(barTranslationY)
         whenever(bubbleBarViewController.bubbleBarBackgroundScaleX).thenReturn(barScaleX)
         whenever(bubbleBarViewController.bubbleBarBackgroundScaleY).thenReturn(barScaleY)
         whenever(bubbleBarViewController.bubbleBarAlpha).thenReturn(barAlpha)
+        whenever(bubbleBarViewController.bubbleBarBubbleAlpha).thenReturn(bubbleAlpha)
+        whenever(bubbleBarViewController.bubbleBarBackgroundAlpha).thenReturn(backgroundAlpha)
         whenever(bubbleBarViewController.bubbleBarCollapsedWidth).thenReturn(BUBBLE_BAR_WIDTH)
         whenever(bubbleBarViewController.bubbleBarCollapsedHeight).thenReturn(BUBBLE_BAR_HEIGHT)
         whenever(bubbleBarViewController.createRevealAnimatorForStashChange(any()))

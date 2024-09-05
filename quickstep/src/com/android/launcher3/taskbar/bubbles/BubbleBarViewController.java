@@ -86,6 +86,9 @@ public class BubbleBarViewController {
 
     // These are exposed to {@link BubbleStashController} to animate for stashing/un-stashing
     private final MultiValueAlpha mBubbleBarAlpha;
+    private final AnimatedFloat mBubbleBarBubbleAlpha = new AnimatedFloat(this::updateBubbleAlpha);
+    private final AnimatedFloat mBubbleBarBackgroundAlpha = new AnimatedFloat(
+            this::updateBackgroundAlpha);
     private final AnimatedFloat mBubbleBarScaleX = new AnimatedFloat(this::updateScaleX);
     private final AnimatedFloat mBubbleBarScaleY = new AnimatedFloat(this::updateScaleY);
     private final AnimatedFloat mBubbleBarBackgroundScaleX = new AnimatedFloat(
@@ -266,6 +269,14 @@ public class BubbleBarViewController {
 
     public MultiPropertyFactory<View> getBubbleBarAlpha() {
         return mBubbleBarAlpha;
+    }
+
+    public AnimatedFloat getBubbleBarBubbleAlpha() {
+        return mBubbleBarBubbleAlpha;
+    }
+
+    public AnimatedFloat getBubbleBarBackgroundAlpha() {
+        return mBubbleBarBackgroundAlpha;
     }
 
     public AnimatedFloat getBubbleBarScaleX() {
@@ -559,6 +570,14 @@ public class BubbleBarViewController {
 
     private void updateBackgroundScaleY(float scale) {
         mBarView.setBackgroundScaleY(scale);
+    }
+
+    private void updateBubbleAlpha(float alpha) {
+        mBarView.setBubbleAlpha(alpha);
+    }
+
+    private void updateBackgroundAlpha(float alpha) {
+        mBarView.setBackgroundAlpha(alpha);
     }
 
     //
