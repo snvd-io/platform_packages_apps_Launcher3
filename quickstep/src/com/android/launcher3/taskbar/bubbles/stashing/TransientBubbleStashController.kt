@@ -19,6 +19,7 @@ package com.android.launcher3.taskbar.bubbles.stashing
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.content.Context
+import android.graphics.Rect
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.VisibleForTesting
@@ -258,6 +259,10 @@ class TransientBubbleStashController(
 
     override fun getHandleTranslationY(): Float? = bubbleStashedHandleViewController?.translationY
 
+    override fun getHandleBounds(bounds: Rect) {
+        bubbleStashedHandleViewController?.getBounds(bounds)
+    }
+
     private fun getStashTranslation(): Float {
         return (bubbleBarTranslationY - stashedHeight) / 2f
     }
@@ -299,6 +304,13 @@ class TransientBubbleStashController(
             createSpringOnStashAnimator(isStashed).apply {
                 this.duration = duration
                 this.interpolator = LINEAR
+            }
+        )
+
+        animatorSet.play(
+            bubbleBarViewController.createRevealAnimatorForStashChange(isStashed).apply {
+                this.duration = duration
+                this.interpolator = EMPHASIZED
             }
         )
 

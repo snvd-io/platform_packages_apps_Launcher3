@@ -16,6 +16,7 @@
 
 package com.android.launcher3.taskbar.bubbles.stashing
 
+import android.animation.AnimatorSet
 import android.animation.AnimatorTestRule
 import android.content.Context
 import android.view.View
@@ -307,6 +308,8 @@ class TransientBubbleStashControllerTest {
         whenever(bubbleBarViewController.bubbleBarAlpha).thenReturn(barAlpha)
         whenever(bubbleBarViewController.bubbleBarCollapsedWidth).thenReturn(BUBBLE_BAR_WIDTH)
         whenever(bubbleBarViewController.bubbleBarCollapsedHeight).thenReturn(BUBBLE_BAR_HEIGHT)
+        whenever(bubbleBarViewController.createRevealAnimatorForStashChange(any()))
+            .thenReturn(AnimatorSet())
     }
 
     private fun setUpBubbleStashedHandleViewController() {
