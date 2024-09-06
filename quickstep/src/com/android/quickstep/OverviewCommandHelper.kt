@@ -254,7 +254,7 @@ constructor(
         if (taskView != null) {
             waitForToggleCommandComplete = true
             taskView.isEndQuickSwitchCuj = true
-            callbackList = taskView.launchTasks()
+            callbackList = taskView.launchWithAnimation()
         }
 
         if (callbackList != null) {
