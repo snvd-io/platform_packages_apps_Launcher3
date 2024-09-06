@@ -362,11 +362,11 @@ class OverviewCommandHelper(
     /** Called when the command finishes execution. */
     private fun onCommandFinished(command: CommandInfo) {
         command.status = CommandStatus.COMPLETED
-        if (commandQueue.first() !== command) {
+        if (commandQueue.firstOrNull() !== command) {
             Log.d(
                 TAG,
                 "next task not scheduled. First pending command type " +
-                    "is ${commandQueue.first()} - command type is: $command"
+                    "is ${commandQueue.firstOrNull()} - command type is: $command"
             )
             return
         }
