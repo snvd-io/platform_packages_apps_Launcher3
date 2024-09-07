@@ -1176,6 +1176,12 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
      * Clean up on destroy from TaskbarControllers
      */
     public void onDestroy() {
+        // If the controller is destroyed before the animation finishes, we cancel the animation
+        // so that we don't finish the CUJ.
+        if (mAnimator != null) {
+            mAnimator.cancel();
+            mAnimator = null;
+        }
         UI_HELPER_EXECUTOR.execute(
                 () -> mAccessibilityManager.unregisterSystemAction(SYSTEM_ACTION_ID_TASKBAR));
     }
