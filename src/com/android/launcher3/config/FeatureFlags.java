@@ -62,11 +62,6 @@ public final class FeatureFlags {
      * and set a default value for the flag. This will be the default value on Debug builds.
      * <p>
      */
-    // TODO(Block 2): Clean up flags
-    public static final BooleanFlag ENABLE_MULTI_DISPLAY_PARTIAL_DEPTH = getDebugFlag(270395073,
-            "ENABLE_MULTI_DISPLAY_PARTIAL_DEPTH", DISABLED,
-            "Allow bottom sheet depth to be smaller than 1 for multi-display devices.");
-
     // TODO(Block 3): Clean up flags
     public static final BooleanFlag ENABLE_DISMISS_PREDICTION_UNDO = getDebugFlag(270394476,
             "ENABLE_DISMISS_PREDICTION_UNDO", DISABLED,
@@ -85,10 +80,6 @@ public final class FeatureFlags {
                     + "data preparation for loading the home screen");
 
     // TODO(Block 4): Cleanup flags
-    public static final BooleanFlag ENABLE_ALL_APPS_FROM_OVERVIEW =
-            getDebugFlag(275132633, "ENABLE_ALL_APPS_FROM_OVERVIEW", DISABLED,
-                    "Allow entering All Apps from Overview (e.g. long swipe up from app)");
-
     public static final BooleanFlag ENABLE_SHOW_KEYBOARD_OPTION_IN_ALL_APPS = getReleaseFlag(
             270394468, "ENABLE_SHOW_KEYBOARD_OPTION_IN_ALL_APPS", ENABLED,
             "Enable option to show keyboard when going to all-apps");
