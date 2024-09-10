@@ -327,7 +327,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
      * @return ActivityOptions with remote animations that controls how the window of the opening
      * targets are displayed.
      */
-    public ActivityOptionsWrapper getActivityLaunchOptions(View v) {
+    public ActivityOptionsWrapper getActivityLaunchOptions(View v, ItemInfo itemInfo) {
         boolean fromRecents = isLaunchingFromRecents(v, null /* targets */);
         RunnableList onEndCallback = new RunnableList();
 
@@ -357,7 +357,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
 
         IBinder cookie = mAppLaunchRunner.supportsReturnTransition()
                 ? ((ContainerAnimationRunner) mAppLaunchRunner).getCookie() : null;
-        addLaunchCookie(cookie, (ItemInfo) v.getTag(), options);
+        addLaunchCookie(cookie, itemInfo, options);
 
         // Register the return animation so it can be triggered on back from the app to home.
         maybeRegisterAppReturnTransition(v);
