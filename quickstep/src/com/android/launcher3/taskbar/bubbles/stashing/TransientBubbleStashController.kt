@@ -303,23 +303,24 @@ class TransientBubbleStashController(
     private fun createStashAnimator(isStashed: Boolean, duration: Long): AnimatorSet {
         val animatorSet = AnimatorSet()
 
-        val alphaDuration = if (isStashed) duration else TASKBAR_STASH_ALPHA_DURATION
-        val alphaDelay = if (isStashed) TASKBAR_STASH_ALPHA_START_DELAY else 0L
         animatorSet.play(
             createBackgroundAlphaAnimator(isStashed).apply {
+                val alphaDuration = if (isStashed) duration else TASKBAR_STASH_ALPHA_DURATION
+                val alphaDelay = if (isStashed) TASKBAR_STASH_ALPHA_START_DELAY else 0L
                 this.duration = max(0L, alphaDuration - alphaDelay)
                 this.startDelay = alphaDelay
                 this.interpolator = LINEAR
             }
         )
 
-        val iconAlphaTarget = if (isStashed) 0f else 1f
         animatorSet.play(
-            bubbleBarBubbleAlpha.animateToValue(iconAlphaTarget).apply {
-                this.duration = TASKBAR_STASH_ALPHA_DURATION
-                this.startDelay = TASKBAR_STASH_ALPHA_START_DELAY
-                this.interpolator = LINEAR
-            }
+            bubbleBarBubbleAlpha
+                .animateToValue(getBarAlphaStart(isStashed), getBarAlphaEnd(isStashed))
+                .apply {
+                    this.duration = TASKBAR_STASH_ALPHA_DURATION
+                    this.startDelay = TASKBAR_STASH_ALPHA_START_DELAY
+                    this.interpolator = LINEAR
+                }
         )
 
         animatorSet.play(
@@ -371,11 +372,15 @@ class TransientBubbleStashController(
         )
 
         animatorSet.doOnStart {
-            if (!isStashed) {
-                bubbleBarBackgroundAlpha.updateValue(0f)
-                bubbleBarBubbleAlpha.updateValue(0f)
-                bubbleBarAlpha.value = 1f
-            }
+            // Update the start value for bubble view and background alpha when the entire animation
+            // begins.
+            // Alpha animation has a delay, and if we set the initial values at the start of the
+            // alpha animation, it will cause flickers.
+            bubbleBarBubbleAlpha.updateValue(getBarAlphaStart(isStashed))
+            bubbleBarBackgroundAlpha.updateValue(getBarAlphaStart(isStashed))
+            // We animate alpha for background and bubble views separately. Make sure the container
+            // is always visible.
+            bubbleBarAlpha.value = 1f
         }
         animatorSet.doOnEnd {
             animator = null
@@ -397,12 +402,27 @@ class TransientBubbleStashController(
     }
 
     private fun createBackgroundAlphaAnimator(isStashed: Boolean): AnimatorSet {
-        val stashHandleAlphaTarget = if (isStashed) 1f else 0f
-        val barAlphaTarget = if (isStashed) 0f else 1f
         return AnimatorSet().apply {
-            play(bubbleBarBackgroundAlpha.animateToValue(barAlphaTarget))
-            play(stashHandleViewAlpha?.animateToValue(stashHandleAlphaTarget))
+            play(
+                bubbleBarBackgroundAlpha.animateToValue(
+                    getBarAlphaStart(isStashed),
+                    getBarAlphaEnd(isStashed),
+                )
+            )
+            play(stashHandleViewAlpha?.animateToValue(getHandleAlphaEnd(isStashed)))
         }
+    }
+
+    private fun getBarAlphaStart(isStashed: Boolean): Float {
+        return if (isStashed) 1f else 0f
+    }
+
+    private fun getBarAlphaEnd(isStashed: Boolean): Float {
+        return if (isStashed) 0f else 1f
+    }
+
+    private fun getHandleAlphaEnd(isStashed: Boolean): Float {
+        return if (isStashed) 1f else 0f
     }
 
     private fun createSpringOnStashAnimator(isStashed: Boolean): Animator {

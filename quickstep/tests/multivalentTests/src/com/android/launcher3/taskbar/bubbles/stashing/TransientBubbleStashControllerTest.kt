@@ -186,6 +186,7 @@ class TransientBubbleStashControllerTest {
         assertThat(bubbleBarView.alpha).isEqualTo(0f)
         assertThat(bubbleBarView.scaleX).isEqualTo(mTransientBubbleStashController.getStashScaleX())
         assertThat(bubbleBarView.scaleY).isEqualTo(mTransientBubbleStashController.getStashScaleY())
+        assertThat(bubbleBarView.background.alpha).isEqualTo(255)
         // Handle view is visible
         assertThat(stashedHandleView.translationY).isEqualTo(0)
         assertThat(stashedHandleView.alpha).isEqualTo(1)
