@@ -23,7 +23,6 @@ import com.android.quickstep.recents.data.TaskVisualsChangedDelegate.TaskThumbna
 import com.android.quickstep.util.TaskVisualsChangeListener
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.recents.model.ThumbnailData
-import java.util.concurrent.ConcurrentHashMap
 
 /** Delegates the checking of task visuals (thumbnails, high res changes, icons) */
 interface TaskVisualsChangedDelegate :
@@ -31,7 +30,7 @@ interface TaskVisualsChangedDelegate :
     /** Registers a callback for visuals relating to icons */
     fun registerTaskIconChangedCallback(
         taskKey: Task.TaskKey,
-        taskIconChangedCallback: TaskIconChangedCallback,
+        taskIconChangedCallback: TaskIconChangedCallback
     )
 
     /** Unregisters a callback for visuals relating to icons */
@@ -40,7 +39,7 @@ interface TaskVisualsChangedDelegate :
     /** Registers a callback for visuals relating to thumbnails */
     fun registerTaskThumbnailChangedCallback(
         taskKey: Task.TaskKey,
-        taskThumbnailChangedCallback: TaskThumbnailChangedCallback,
+        taskThumbnailChangedCallback: TaskThumbnailChangedCallback
     )
 
     /** Unregisters a callback for visuals relating to thumbnails */
@@ -67,9 +66,31 @@ class TaskVisualsChangedDelegateImpl(
     private val highResLoadingStateNotifier: HighResLoadingStateNotifier,
 ) : TaskVisualsChangedDelegate {
     private val taskIconChangedCallbacks =
-        ConcurrentHashMap<Int, Pair<Task.TaskKey, TaskIconChangedCallback>>()
+        mutableMapOf<Int, Pair<Task.TaskKey, TaskIconChangedCallback>>()
     private val taskThumbnailChangedCallbacks =
-        ConcurrentHashMap<Int, Pair<Task.TaskKey, TaskThumbnailChangedCallback>>()
+        mutableMapOf<Int, Pair<Task.TaskKey, TaskThumbnailChangedCallback>>()
+    private var isListening = false
+
+    @Synchronized
+    private fun onCallbackRegistered() {
+        if (isListening) return
+
+        taskVisualsChangeNotifier.addThumbnailChangeListener(this)
+        highResLoadingStateNotifier.addCallback(this)
+        isListening = true
+    }
+
+    @Synchronized
+    private fun onCallbackUnregistered() {
+        if (!isListening) return
+
+        if (taskIconChangedCallbacks.size + taskThumbnailChangedCallbacks.size == 0) {
+            taskVisualsChangeNotifier.removeThumbnailChangeListener(this)
+            highResLoadingStateNotifier.removeCallback(this)
+        }
+
+        isListening = false
+    }
 
     override fun onTaskIconChanged(taskId: Int) {
         taskIconChangedCallbacks[taskId]?.let { (_, callback) -> callback.onTaskIconChanged() }
@@ -98,48 +119,27 @@ class TaskVisualsChangedDelegateImpl(
 
     override fun registerTaskIconChangedCallback(
         taskKey: Task.TaskKey,
-        taskIconChangedCallback: TaskIconChangedCallback,
+        taskIconChangedCallback: TaskIconChangedCallback
     ) {
-        updateCallbacks {
-            taskIconChangedCallbacks[taskKey.id] = taskKey to taskIconChangedCallback
-        }
+        taskIconChangedCallbacks[taskKey.id] = taskKey to taskIconChangedCallback
+        onCallbackRegistered()
     }
 
     override fun unregisterTaskIconChangedCallback(taskKey: Task.TaskKey) {
-        updateCallbacks { taskIconChangedCallbacks.remove(taskKey.id) }
+        taskIconChangedCallbacks.remove(taskKey.id)
+        onCallbackUnregistered()
     }
 
     override fun registerTaskThumbnailChangedCallback(
         taskKey: Task.TaskKey,
-        taskThumbnailChangedCallback: TaskThumbnailChangedCallback,
+        taskThumbnailChangedCallback: TaskThumbnailChangedCallback
     ) {
-        updateCallbacks {
-            taskThumbnailChangedCallbacks[taskKey.id] = taskKey to taskThumbnailChangedCallback
-        }
+        taskThumbnailChangedCallbacks[taskKey.id] = taskKey to taskThumbnailChangedCallback
+        onCallbackRegistered()
     }
 
     override fun unregisterTaskThumbnailChangedCallback(taskKey: Task.TaskKey) {
-        updateCallbacks { taskThumbnailChangedCallbacks.remove(taskKey.id) }
-    }
-
-    @Synchronized
-    private fun updateCallbacks(callbackModifier: () -> Unit) {
-        val prevHasCallbacks =
-            taskIconChangedCallbacks.size + taskThumbnailChangedCallbacks.size > 0
-        callbackModifier()
-
-        val currHasCallbacks =
-            taskIconChangedCallbacks.size + taskThumbnailChangedCallbacks.size > 0
-
-        when {
-            prevHasCallbacks && !currHasCallbacks -> {
-                taskVisualsChangeNotifier.removeThumbnailChangeListener(this)
-                highResLoadingStateNotifier.removeCallback(this)
-            }
-            !prevHasCallbacks && currHasCallbacks -> {
-                taskVisualsChangeNotifier.addThumbnailChangeListener(this)
-                highResLoadingStateNotifier.addCallback(this)
-            }
-        }
+        taskThumbnailChangedCallbacks.remove(taskKey.id)
+        onCallbackUnregistered()
     }
 }
