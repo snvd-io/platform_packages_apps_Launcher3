@@ -257,9 +257,14 @@ public final class FeatureFlags {
     }
 
     // TODO(Block 29): Clean up flags
+    // Aconfig migration complete for ENABLE_ALL_APPS_BUTTON_IN_HOTSEAT.
     public static final BooleanFlag ENABLE_ALL_APPS_BUTTON_IN_HOTSEAT = getDebugFlag(270393897,
             "ENABLE_ALL_APPS_BUTTON_IN_HOTSEAT", DISABLED,
             "Enables displaying the all apps button in the hotseat.");
+
+    public static boolean enableAllAppsButtonInHotseat() {
+        return ENABLE_ALL_APPS_BUTTON_IN_HOTSEAT.get() || Flags.enableAllAppsButtonInHotseat();
+    }
 
     // TODO(Block 30): Clean up flags
     public static final BooleanFlag USE_SEARCH_REQUEST_TIMEOUT_OVERRIDES = getDebugFlag(270395010,
