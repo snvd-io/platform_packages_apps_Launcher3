@@ -481,4 +481,13 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
     protected String getTaskbarUIControllerName() {
         return "LauncherTaskbarUIController";
     }
+
+    @Override
+    public void onSwipeToUnstashTaskbar() {
+        // Once taskbar is unstashed, the user cannot return back to the overlay. We can
+        // clear it here to set the expected state once the user goes home.
+        if (mLauncher.getWorkspace().isOverlayShown()) {
+            mLauncher.getWorkspace().onOverlayScrollChanged(0);
+        }
+    }
 }
