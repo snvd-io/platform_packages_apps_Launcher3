@@ -44,6 +44,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.R;
 import com.android.launcher3.dagger.ApplicationContext;
+import com.android.launcher3.dagger.LauncherAppSingleton;
 import com.android.launcher3.logging.InstanceId;
 import com.android.launcher3.logging.StatsLogManager;
 import com.android.launcher3.logging.StatsLogManager.StatsLogger;
@@ -69,6 +70,7 @@ import javax.inject.Inject;
 /**
  * Utility class to log launcher settings changes
  */
+@LauncherAppSingleton
 public class SettingsChangeLogger implements
         DisplayController.DisplayInfoChangeListener, OnSharedPreferenceChangeListener,
         SafeCloseable {
