@@ -41,6 +41,7 @@ import com.android.launcher3.util.window.WindowManagerProxy
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import kotlin.math.min
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -135,6 +136,13 @@ class DisplayControllerTest {
         // Initialize DisplayController
         displayController = DisplayController(context)
         displayController.addChangeListener(displayInfoChangeListener)
+    }
+
+    @After
+    fun tearDown() {
+        // We need to reset the taskbar mode preference override even if a test throws an exception.
+        // Otherwise, it may break the following tests' assumptions.
+        DisplayController.enableTaskbarModePreferenceForTests(false)
     }
 
     @Test
