@@ -81,7 +81,7 @@ class DisplayControllerTest {
             WindowBounds(Rect(0, 0, width, height), Rect(0, inset, 0, 0), Surface.ROTATION_0),
             WindowBounds(Rect(0, 0, height, width), Rect(0, inset, 0, 0), Surface.ROTATION_90),
             WindowBounds(Rect(0, 0, width, height), Rect(0, inset, 0, 0), Surface.ROTATION_180),
-            WindowBounds(Rect(0, 0, height, width), Rect(0, inset, 0, 0), Surface.ROTATION_270)
+            WindowBounds(Rect(0, 0, height, width), Rect(0, inset, 0, 0), Surface.ROTATION_270),
         )
     private val configuration =
         Configuration(appContext.resources.configuration).apply {
@@ -170,7 +170,7 @@ class DisplayControllerTest {
     @UiThreadTest
     fun testTaskbarPinning() {
         whenever(launcherPrefs.get(TASKBAR_PINNING)).thenReturn(true)
-        displayController.handleInfoChange(display)
+        displayController.handleInfoChange()
         verify(displayInfoChangeListener)
             .onDisplayInfoChanged(any(), any(), eq(CHANGE_TASKBAR_PINNING))
     }
@@ -179,7 +179,7 @@ class DisplayControllerTest {
     @UiThreadTest
     fun testTaskbarPinningChangeInDesktopMode() {
         whenever(launcherPrefs.get(TASKBAR_PINNING_IN_DESKTOP_MODE)).thenReturn(false)
-        displayController.handleInfoChange(display)
+        displayController.handleInfoChange()
         verify(displayInfoChangeListener)
             .onDisplayInfoChanged(any(), any(), eq(CHANGE_TASKBAR_PINNING))
     }
@@ -194,7 +194,7 @@ class DisplayControllerTest {
         DisplayController.enableTaskbarModePreferenceForTests(true)
 
         assertTrue(displayController.getInfo().isTransientTaskbar())
-        displayController.handleInfoChange(display)
+        displayController.handleInfoChange()
         verify(displayInfoChangeListener)
             .onDisplayInfoChanged(any(), any(), eq(CHANGE_TASKBAR_PINNING))
         assertFalse(displayController.getInfo().isTransientTaskbar())
