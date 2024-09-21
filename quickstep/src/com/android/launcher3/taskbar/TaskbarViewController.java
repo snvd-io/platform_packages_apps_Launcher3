@@ -140,10 +140,6 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
     private final AnimatedFloat mTaskbarIconTranslationYForPinning = new AnimatedFloat(
             this::updateTranslationY);
 
-    private final View.OnLayoutChangeListener mTaskbarViewLayoutChangeListener =
-            (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom)
-                    -> updateTaskbarIconTranslationXForPinning();
-
 
     private AnimatedFloat mTaskbarNavButtonTranslationY;
     private AnimatedFloat mTaskbarNavButtonTranslationYForInAppDisplay;
@@ -157,6 +153,12 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
 
     // Initialized in init.
     private TaskbarControllers mControllers;
+
+    private final View.OnLayoutChangeListener mTaskbarViewLayoutChangeListener =
+            (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                updateTaskbarIconTranslationXForPinning();
+                mControllers.navbarButtonsViewController.onTaskbarLayoutChange();
+            };
 
     // Animation to align icons with Launcher, created lazily. This allows the controller to be
     // active only during the animation and does not need to worry about layout changes.
