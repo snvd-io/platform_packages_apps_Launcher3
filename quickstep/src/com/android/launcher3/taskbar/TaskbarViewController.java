@@ -831,6 +831,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
             View child = mTaskbarView.getChildAt(i);
             boolean isAllAppsButton = child == mTaskbarView.getAllAppsButtonContainer();
             boolean isTaskbarDividerView = child == mTaskbarView.getTaskbarDividerViewContainer();
+            boolean isTaskbarOverflowView = child == mTaskbarView.getTaskbarOverflowView();
             boolean isRecentTask = child.getTag() instanceof GroupTask;
             // TODO(b/343522351): show recents on the home screen.
             final boolean isRecentsInHotseat = false;
@@ -841,7 +842,8 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
                 setter.setViewAlpha(child, 0, Interpolators.clampToProgress(LINEAR, 0.8f, 1f));
             } else if ((isAllAppsButton && !FeatureFlags.enableAllAppsButtonInHotseat())
                     || (isTaskbarDividerView && enableTaskbarPinning())
-                    || (isRecentTask && !isRecentsInHotseat)) {
+                    || (isRecentTask && !isRecentsInHotseat)
+                    || isTaskbarOverflowView) {
                 if (!isToHome
                         && mIsHotseatIconOnTopWhenAligned
                         && mIsStashed) {
